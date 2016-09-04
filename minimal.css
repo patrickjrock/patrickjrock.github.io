@@ -57,6 +57,18 @@ h1,h2,h3,h4,h5,h6 { color: #333; }
 
 p { margin-bottom: 20px; }
 
+
+.but {
+background-color: #e7e7e7; 
+border: none;
+padding: 15px 32px;
+text-align: center;
+display: inline-block;
+font-size: 12px;
+margin: 4px 2px;
+cursor: pointer;
+}
+
 .float-left     { float: left; }
 .float-right    { float: right; }
 img.float-left  { float: left; margin: 0 20px 20px 0; }
@@ -112,3 +124,6 @@ tfoot { font-style: italic; }
 		box-shadow: none !important;
 		color: #000 !important;
 	}
+
+
+
