@@ -9,6 +9,11 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
+function makeTable(a,b,c,d) {
+  var t = '<table class="pure-table pure-table-bordered"><tbody> <tr> <td>Status</td> <td >Infected</td> <td >Uninfected</td> </tr> <tr>';
+  t = t + '<td>Exposed</td> <td>A</td> <td>B</td> </tr><tr><td>Unexposed</td> <td>C</td> <td>D</td> </tr> </tbody></table>';
+  return t.replace("A",a).replace("B",b).replace("C",c).replace("D",d);
+}
 
 function getMeanQuestion() {
   v1 = getRandomInt(1,100);  
@@ -70,24 +75,89 @@ function getprevalanceQuestion() {
 }
 
 function getORQuestion() {
+  a = getRandomInt(1,100);
+  b = getRandomInt(1,100);
+  c = getRandomInt(1,100);
+  d = getRandomInt(1,100);
+ 
+  var q = makeTable(a,b,c,d)
+  q = q + "Calculate the odds ratio."
+  var ans = (a*d)/(b*c);
+  return new Question(q,ans);
 }
 
 function getRRQuestion() {
+  a = getRandomInt(1,100);
+  b = getRandomInt(1,100);
+  c = getRandomInt(1,100);
+  d = getRandomInt(1,100);
+ 
+  var q = makeTable(a,b,c,d)
+  q = q + "Calculate the relative risk."
+  var ans = (a/(a+b))/(c/(c+d));
+  return new Question(q,ans);
 }
 
 function getARQuestion() {
+  a = getRandomInt(1,100);
+  b = getRandomInt(1,100);
+  c = getRandomInt(1,100);
+  d = getRandomInt(1,100);
+ 
+  var q = makeTable(a,b,c,d)
+  q = q + "Calculate the attributable risk."
+  var ans = (a/(a+b)) - (c/(c+d));
+  return new Question(q,ans);
 }
 
 function getRRRQuestion() {
+  a = getRandomInt(1,100);
+  b = getRandomInt(1,100);
+  c = getRandomInt(1,100);
+  d = getRandomInt(1,100);
+ 
+  var q = makeTable(a,b,c,d)
+  q = q + "Calculate the relative risk reduction."
+  var ans = 1 - (a/(a+b))/(c/(c+d));
+  return new Question(q,ans);
 }
 
 function getARRQuestion() {
+  a = getRandomInt(1,100);
+  b = getRandomInt(1,100);
+  c = getRandomInt(1,100);
+  d = getRandomInt(1,100);
+ 
+  var q = makeTable(a,b,c,d)
+  q = q + "Calculate the absolute risk reduction."
+  var ans = (c/(c+d)) - (a/(a+b));
+  return new Question(q,ans);
 }
 
 function getNNTQuestion() {
+
+  a = getRandomInt(1,100);
+  b = getRandomInt(1,100);
+  c = getRandomInt(1,100);
+  d = getRandomInt(1,100);
+ 
+  var q = makeTable(a,b,c,d)
+  q = q + "Calculate the number needed to treat."
+  var ans = 1 / ( (c/(c+d)) - (a/(a+b)));
+  return new Question(q,ans);
 }
 
 function getNNHQuestion() {
+
+  a = getRandomInt(1,100);
+  b = getRandomInt(1,100);
+  c = getRandomInt(1,100);
+  d = getRandomInt(1,100);
+ 
+  var q = makeTable(a,b,c,d)
+  q = q + "Calculate the number needed to harm."
+  var ans = 1 / ( (a/(a+b)) - (c/(c+d)));
+  return new Question(q,ans);
 }
 
 var q = getSpecificityQuestion();
@@ -97,7 +167,7 @@ function show() {
 }
 
 function unshow() {
-  $("p#answer").html('<button class="pure-button" onclick="show()">Show Answer</button>"');
+  $("p#answer").html('<button class="pure-button" onclick="show()">Show Answer</button>');
 }
 
 function setQuestion(qid) {
@@ -119,8 +189,29 @@ function setQuestion(qid) {
       break;
     case 5:
       q = getprevalanceQuestion();
+      break;
+    case 6:
+      q = getORQuestion();
+      break;
+    case 7:
+      q = getRRQuestion();
+      break;
+    case 8:
+      q = getARQuestion();
+      break;
+    case 9:
+      q = getRRRQuestion();
+      break;
+    case 10:
+      q = getARRQuestion();
+      break;
+    case 11:
+      q = getNNTQuestion();
+      break;
+    case 12:
+      q = getNNHQuestion();
   }
-  $("p#answer").html('<button class="pure-button" onclick="show()">Show Answer</button>"');
+  $("p#answer").html('<button class="pure-button" onclick="show()">Show Answer</button>');
   $("p#question").html(q.question);
 }
 
