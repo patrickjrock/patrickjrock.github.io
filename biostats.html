@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title>Biostats</title>
+    <meta name="description" content="Biostats">
+    <link rel="shortcut icon" href="images/favicon-stethoscope.ico" />
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+    <link href="minimal.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="assets/js/biostats.js"></script>
+
+
+</head>
+<body>
+<div class="container">
+    <header>
+        <a class="logo" href="http://patrickjrock.com">Biostats</a>
+    </header>
+       
+    <div class="row text-center">
+      <div class="col-4" style="margin-top: 5%; text-align: left;">
+        <div class="pure-menu custom-restricted-width">
+	  <ul class="pure-menu-list ">
+	    <li class="pure-menu-item"><a href="javascript:setQuestion(0)" class="pure-menu-link">Sensitivity</a></li>
+	    <li class="pure-menu-item"><a href="javascript:setQuestion(1)" class="pure-menu-link">Specificity</a></li>
+	    <li class="pure-menu-item"><a href="javascript:setQuestion(2)" class="pure-menu-link">Positive Predictive Value</a></li>
+	    <li class="pure-menu-item"><a href="javascript:setQuestion(3)" class="pure-menu-link">Negative Predictive Value</a></li>
+	    <li class="pure-menu-item"><a href="javascript:setQuestion(4)" class="pure-menu-link">Incidence</a></li>
+	    <li class="pure-menu-item"><a href="javascript:setQuestion(5)" class="pure-menu-link">Prevalence</a></li>
+	    <li class="pure-menu-item"><a href="#" class="pure-menu-link">Odds Ratio</a></li>
+	    <li class="pure-menu-item"><a href="#" class="pure-menu-link">Relative Risk</a></li>
+	    <li class="pure-menu-item"><a href="#" class="pure-menu-link">Attributable Risk</a></li>
+	    <li class="pure-menu-item"><a href="#" class="pure-menu-link">Relative Risk Reduction</a></li>
+	    <li class="pure-menu-item"><a href="#" class="pure-menu-link">Absolute Risk Reduction</a></li>
+	    <li class="pure-menu-item"><a href="#" class="pure-menu-link">Number Needed To Treat</a></li>
+            <li class="pure-menu-item"><a href="#" class="pure-menu-link">Number Needed To Harm</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-8" style="margin-top: 20%">
+        <p id="question"></p>
+
+        <hr border="no" width="25%" style="margin-top: 20; margin-bottom: 50px;">
+
+        <p id="answer"><button class="pure-button" onclick="show()">Show Answer</button></p>
+      </div>
+    </div>
+
+        <footer>
+            &copy; Patrick Rock <!-- Link not required, but appreciated. --><a class="float-right" href="http://minimalcss.com">Minimal</a>
+    </footer><!-- footer -->
+</div>
+</body>
+</html>
