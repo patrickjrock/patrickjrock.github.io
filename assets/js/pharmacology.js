@@ -40,7 +40,7 @@ function getHLQuestion() {
   Cl = getRandomInt(1, 100);
   Vd = getRandomInt(1, 100);
   var q = "What is the half life of a drug with a clearance of " + Cl + " mg/L and a Vd of " + Vd + " L ?";
-  var a = Vd/Cl
+  var a = 0.7*Vd/Cl
   return new Question(q,a)
 }
 
