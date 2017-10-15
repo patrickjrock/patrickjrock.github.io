@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+	<title>Albers</title>
+	<meta name="description" content="Uworld Journal">
+        <link rel="shortcut icon" href="images/favicon-stethoscope.ico" />
+	<link href="minimal.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+	<header>
+		<a class="logo" href="http://patrickjrock.com">Homage to the Homage to the Square</a>
+        </header>
+        <div class="row">
+        <div class="col-5">
+        <br>
+        <br>
+        <p><i>"In musical compositions, so long as we hear merely
+        single tones, we do not hear music. Hearing music depends on
+        the recognition of the in-between of the tones, of their
+        placing and of their spacing.
+        <br>
+        <br>
+        In writing, a knowledge of spelling has nothing to do with an
+        understanding of poetry.
+        <br>
+        <br>
+        Equally, a factual identification of colors within a given
+        painting has nothing to do with a sensitive seeing nor with an
+        understanding of the color action within the painting."</i> 
+       <br>
+       <br>
+        -Josef Albers</p>
+       </div>
+       
+       <div class="col-7">
+         <canvas id="myCanvas" width="600" height="600">
+         <script>
+           function getRandomColor() {
+             var letters = '0123456789ABCDEF';
+             var color = '#';
+             for (var i = 0; i < 6; i++) {
+               color += letters[Math.floor(Math.random() * 16)];
+             }
+               return color;
+           }
+
+
+           var canvas = document.getElementById("myCanvas");
+           var ctx = canvas.getContext("2d");
+        
+           ctx.fillStyle = getRandomColor();
+           ctx.fillRect(50,50,500,500);
+
+           ctx.fillStyle = getRandomColor();
+           ctx.fillRect(100,125,400,400);
+
+           ctx.fillStyle = getRandomColor();
+           ctx.fillRect(150,200,300,300);
+
+           ctx.fillStyle = getRandomColor();
+           ctx.fillRect(200,275,200,200);
+         </script>
+ 
+       </div>
+       </div>
+
+    <footer>
+			&copy; Patrick Rock <!-- Link not required, but appreciated. -->
+	</footer><!-- footer -->
+</div>
+</body>
+</html>
