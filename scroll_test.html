@@ -40,12 +40,12 @@
     const imageContainer = document.getElementById("image-container");
     const currentImage = document.getElementById("current-image");
 
-    // Initialize image index and max image index
+    // Initialize image index
     let currentImageIndex = 1;
-    let maxImageIndex = 1;
+    const maxImageIndex = 29; // Update this with the actual number of images in the folder
 
-    // Preload the first image and determine the max image index
-    preloadAndSetMaxIndex();
+    // Preload the first image
+    preloadImage(currentImageIndex);
 
     // Handle scroll events
     function handleScroll(event) {
@@ -70,22 +70,6 @@
         event.preventDefault();
     }
 
-    // Function to preload an image and set the max image index
-    async function preloadAndSetMaxIndex() {
-        // Fetch the metadata of the first image to get the total number of images
-        const response = await fetch(`${imagePath}Anonymize.Seq9.Ser12.Img1.jpg`);
-        if (response.ok) {
-            const contentRangeHeader = response.headers.get("Content-Range");
-            if (contentRangeHeader) {
-                const [, totalImages] = /\/(\d+)$/.exec(contentRangeHeader);
-                maxImageIndex = parseInt(totalImages);
-            }
-        }
-
-        // Preload the first image
-        preloadImage(currentImageIndex);
-    }
-
     // Preload an image
     function preloadImage(index) {
         const image = new Image();
@@ -103,6 +87,7 @@
     // Load and display the initial image
     loadAndDisplayImage(currentImageIndex);
 </script>
+
 
 
 </body>
