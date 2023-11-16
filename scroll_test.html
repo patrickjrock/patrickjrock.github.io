@@ -34,7 +34,7 @@
 
     <script>
         const scanContainer = document.getElementById('scanContainer');
-        const numberOfImages = 29; // Change this to the actual number of images in your stack
+        const numberOfImages = 10; // Change this to the actual number of images in your stack
 
         // Create image elements and append them to the container
         for (let i = 1; i <= numberOfImages; i++) {
@@ -46,6 +46,9 @@
         }
 
         const scanImages = document.querySelectorAll('.scan-image');
+
+        // Set the visibility of the first image to 'visible'
+        scanImages[0].style.visibility = 'visible';
 
         scanContainer.addEventListener('scroll', function() {
             // Calculate the index of the visible image based on scroll position
@@ -59,7 +62,7 @@
             // Preload the next image to improve user experience
             if (scanImages[index + 1]) {
                 const nextImage = new Image();
-                nextImage.src = `img${index + 2}.jpg`;
+                nextImage.src = `images/optic_glioma/Anonymize.Seq9.Ser12.Img${index + 2}`;
             }
         });
     </script>
