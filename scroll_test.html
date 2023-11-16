@@ -4,120 +4,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-            margin: 0;
-        }
-
         .image-container {
             overflow: hidden;
-            width: 45%; /* Adjust the width of the containers as needed */
-            height: 80vh; /* Adjust the height of the containers as needed */
-            border: 1px solid #ccc;
         }
-
-        .current-image {
+        .image-slider {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+        .image {
             width: 100%;
             height: auto;
         }
     </style>
-    <title>CT Scan Viewer</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Function to create an image element
+            function loadImage(imagePath, imageNumber) {
+                const imageElement = document.createElement("img");
+                imageElement.src = `${imagePath}${imageNumber}.jpg`;
+                imageElement.classList.add("image");
+                return imageElement;
+            }
+
+            // Function to initialize a slider for a given container
+            function initializeSlider(container) {
+                const imageSlider = container.querySelector(".image-slider");
+                const imagePath = container.getAttribute("data-image-path");
+                let currentImage = 1;
+                const totalImages = container.getAttribute("data-total-images");
+
+                // Function to update the slider position
+                function updateSlider() {
+                    const translateValue = -((currentImage - 1) * 100);
+                    imageSlider.style.transform = `translateX(${translateValue}%)`;
+                }
+
+                // Handle mouse wheel scrolling
+                function handleWheel(event) {
+                    event.preventDefault();
+                    const delta = Math.sign(event.deltaY);
+                    currentImage = (currentImage - delta + totalImages) % totalImages + 1;
+                    updateSlider();
+                }
+
+                container.addEventListener("wheel", handleWheel);
+
+                // Populate the slider with images
+                for (let i = 1; i <= totalImages; i++) {
+                    imageSlider.appendChild(loadImage(imagePath, i));
+                }
+
+                updateSlider();
+            }
+
+            // Initialize sliders for all image containers
+            const imageContainers = document.querySelectorAll(".image-container");
+            imageContainers.forEach(initializeSlider);
+        });
+    </script>
 </head>
 <body>
-
-<div class="image-container" data-image-path="optic_glioma/" data-max-index="29">
-    <img class="current-image" src="optic_glioma" alt="CT Scan Image">
-</div>
-
-<div class="image-container" data-image-path="another_directory/" data-max-index="29">
-    <img class="current-image" src="optic_glioma" alt="CT Scan Image">
-</div>
-
-<!-- Add more image containers as needed -->
-
-<script>
-    // Sample base image path
-    const basePath = "https://patrickjrock.github.io/images/";
-
-    // Initialize image indices and max image indices for each container
-    const containers = {};
-
-    // Get all image containers with the class 'image-container'
-    const imageContainers = document.querySelectorAll('.image-container');
-
-    // Loop through each image container to set up variables and event listeners
-    imageContainers.forEach((container, index) => {
-        const containerId = `container${index + 1}`;
-        containers[containerId] = {
-            currentIndex: 1,
-            maxIndex: parseInt(container.getAttribute('data-max-index'))
-        };
-
-        // Preload the first image for the current container
-        preloadImage(containerId);
-
-        // Add a unique identifier (containerId) to the container for reference
-        container.setAttribute('data-container-id', containerId);
-
-        // Attach the event listener for scroll events to each container
-        container.addEventListener('wheel', (event) => handleScroll(event, containerId));
-    });
-
-    // Handle scroll events for each container
-    function handleScroll(event, containerId) {
-        const container = containers[containerId];
-
-        // Check if the scroll direction is up or down
-        const delta = Math.sign(event.deltaY);
-
-        // Update the current image index based on the scroll direction
-        container.currentIndex += delta;
-
-        // Wrap around to the first image if the index exceeds the maximum
-        if (container.currentIndex > container.maxIndex) {
-            container.currentIndex = 1;
-        } else if (container.currentIndex < 1) {
-            // Wrap around to the last image if the index is less than 1
-            container.currentIndex = container.maxIndex;
-        }
-
-        // Load and display the new image for the current container
-        loadAndDisplayImage(containerId);
-
-        // Prevent the default scroll behavior
-        event.preventDefault();
-    }
-
-    // Function to preload an image for a specific container
-    function preloadImage(containerId) {
-        const container = containers[containerId];
-        const imageContainer = document.querySelector(`[data-container-id="${containerId}"]`);
-        const imagePath = imageContainer.getAttribute('data-image-path');
-        const image = new Image();
-        image.src = `${basePath}${imagePath}Anonymize.Seq9.Ser12.Img${container.currentIndex}.jpg`;
-    }
-
-    // Load and display an image for a specific container
-    function loadAndDisplayImage(containerId) {
-        const container = containers[containerId];
-        const currentImage = document.querySelector(`[data-container-id="${containerId}"] .current-image`);
-        const imageContainer = document.querySelector(`[data-container-id="${containerId}"]`);
-        const imagePath = imageContainer.getAttribute('data-image-path');
-        currentImage.src = `${basePath}${imagePath}Anonymize.Seq9.Ser12.Img${container.currentIndex}.jpg`;
-
-        // Preload the next image for the current container
-        preloadImage(containerId);
-    }
-
-    // Load and display the initial images for each container
-    for (const containerId in containers) {
-        loadAndDisplayImage(containerId);
-    }
-</script>
-
+    <div class="image-container" data-image-path="patrickjrock.github.io/images/optic_glioma" data-total-images="29">
+        <div class="image-slider"></div>
+    </div>
+    <!-- Add more image containers as needed -->
 </body>
 </html>
