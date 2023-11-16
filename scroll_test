@@ -1,0 +1,69 @@
+tml
+Copy code
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Images Presentation</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .scan-container {
+            max-height: 80vh; /* Adjust the maximum height as needed */
+            overflow-y: auto;
+            padding: 20px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .scan-image {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="scan-container" id="scanContainer"></div>
+
+    <script>
+        const scanContainer = document.getElementById('scanContainer');
+        const numberOfImages = 10; // Change this to the actual number of images in your stack
+
+        // Create image elements and append them to the container
+        for (let i = 1; i <= numberOfImages; i++) {
+            const image = document.createElement('div');
+            image.classList.add('scan-image');
+            image.style.backgroundImage = `url('images/optic_glioma/Anonymize.Seq9.Ser12.Img${i}.jpg')`;
+            image.dataset.index = i;
+            scanContainer.appendChild(image);
+        }
+
+        const scanImages = document.querySelectorAll('.scan-image');
+
+        scanContainer.addEventListener('scroll', function() {
+            // Calculate the index of the visible image based on scroll position
+            const index = Math.floor(scanContainer.scrollTop / scanImages[0].offsetHeight);
+
+            // Update the visibility of the image elements
+            scanImages.forEach((image, i) => {
+                image.style.visibility = i === index ? 'visible' : 'hidden';
+            });
+
+            // Preload the next image to improve user experience
+            if (scanImages[index + 1]) {
+                const nextImage = new Image();
+                nextImage.src = `img${index + 2}.jpg`;
+            }
+        });
+    </script>
+</body>
+</html>
