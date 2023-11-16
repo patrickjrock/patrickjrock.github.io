@@ -3,69 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medical Images Presentation</title>
     <style>
         body {
             margin: 0;
-            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
         }
 
-        .scan-container {
-            max-height: 80vh; /* Adjust the maximum height as needed */
-            overflow-y: auto;
-            padding: 20px;
+        #image-container {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
         }
 
-        .scan-image {
-            max-width: 100%;
+        #current-image {
+            width: 100%;
             height: auto;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 8px;
         }
     </style>
+    <title>CT Scan Viewer</title>
 </head>
 <body>
-    <div class="scan-container" id="scanContainer"></div>
 
-    <script>
-        const scanContainer = document.getElementById('scanContainer');
-        const numberOfImages = 10; // Change this to the actual number of images in your stack
+<div id="image-container" onwheel="handleScroll(event)">
+    <img id="current-image" src="" alt="CT Scan Image">
+</div>
 
-        // Create image elements and append them to the container
-        for (let i = 1; i <= numberOfImages; i++) {
-            const image = document.createElement('div');
-            image.classList.add('scan-image');
-            image.style.backgroundImage = `url('images/optic_glioma/Anonymize.Seq9.Ser12.Img${i}.jpg')`;
-            scanContainer.appendChild(image);
+<script>
+    // Sample image folder path
+    const imagePath = "https://patrickjrock.github.io/images/optic_glioma/";
+
+    // Get the image container and the current image element
+    const imageContainer = document.getElementById("image-container");
+    const currentImage = document.getElementById("current-image");
+
+    // Initialize image index
+    let currentImageIndex = 1;
+
+    // Preload the first image
+    preloadImage(currentImageIndex);
+
+    // Handle scroll events
+    function handleScroll(event) {
+        // Check if the scroll direction is up or down
+        const delta = Math.sign(event.deltaY);
+
+        // Update the current image index based on the scroll direction
+        currentImageIndex += delta;
+
+        // Ensure the index is within bounds
+        if (currentImageIndex < 1) {
+            currentImageIndex = 1;
         }
 
-        const scanImages = document.querySelectorAll('.scan-image');
+        // Load and display the new image
+        loadAndDisplayImage(currentImageIndex);
 
-        // Set the visibility of the first image to 'visible'
-        scanImages[0].style.visibility = 'visible';
+        // Prevent the default scroll behavior
+        event.preventDefault();
+    }
 
-        scanContainer.addEventListener('scroll', function() {
-            const containerHeight = scanContainer.clientHeight;
-            const imageHeight = scanImages[0].offsetHeight;
-            const scrollTop = scanContainer.scrollTop;
+    // Preload an image
+    function preloadImage(index) {
+        const image = new Image();
+        image.src = `${imagePath}Anonymize.Seq9.Ser12.Img${index}.jpg`;
+    }
 
-            // Calculate the index of the visible image based on scroll position
-            const index = Math.floor(scrollTop / imageHeight);
+    // Load and display an image
+    function loadAndDisplayImage(index) {
+        currentImage.src = `${imagePath}Anonymize.Seq9.Ser12.Img${index}.jpg`;
 
-            // Update the visibility of the image elements
-            scanImages.forEach((image, i) => {
-                const isVisible = i === index;
-                image.style.visibility = isVisible ? 'visible' : 'hidden';
-                image.style.marginTop = isVisible ? scrollTop % imageHeight + 'px' : '0';
-            });
+        // Preload the next image
+        preloadImage(index + 1);
+    }
 
-            // Preload the next image to improve user experience
-            if (scanImages[index + 1]) {
-                const nextImage = new Image();
-                nextImage.src = `images/optic_glioma/Anonymize.Seq9.Ser12.Img${index + 2}`;
-            }
-        });
-    </script>
+    // Load and display the initial image
+    loadAndDisplayImage(currentImageIndex);
+</script>
+
 </body>
 </html>
