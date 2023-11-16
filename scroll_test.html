@@ -34,13 +34,13 @@
 
     <script>
         const scanContainer = document.getElementById('scanContainer');
-        const numberOfImages = 10; // Change this to the actual number of images in your stack
+        const numberOfImages = 29; // Change this to the actual number of images in your stack
 
         // Create image elements and append them to the container
         for (let i = 1; i <= numberOfImages; i++) {
             const image = document.createElement('div');
             image.classList.add('scan-image');
-            image.style.backgroundImage = 'images/optic_glioma/Anonymize.Seq9.Ser12.Img1.jpg';
+            image.style.backgroundImage = `url('images/optic_glioma/Anonymize.Seq9.Ser12.Img${i}')`;
             image.dataset.index = i;
             scanContainer.appendChild(image);
         }
