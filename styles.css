@@ -22,14 +22,18 @@ p {
             max-height: 80vh; /* Adjust the maximum height as needed */
             overflow-y: auto;
             padding: 20px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
         }
 
-        img {
+        .scan-image {
             max-width: 100%;
             height: auto;
             border: 1px solid #ddd;
             border-radius: 4px;
             margin-bottom: 8px;
+            visibility: hidden;
         }
 
 /* Navigation controls */
