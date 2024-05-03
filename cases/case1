@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radiology Case</title>
+<style>
+    .container {
+        text-align: center;
+    }
+    .discussion {
+        display: none;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Radiology Case</h1>
+    <h2>Images</h2>
+    <img src="image1.jpg" alt="Radiology Image 1">
+    <img src="image2.jpg" alt="Radiology Image 2">
+    <img src="image3.jpg" alt="Radiology Image 3">
+    <!-- Add more image tags as needed -->
+
+    <button onclick="toggleDiscussion()">Show Discussion</button>
+    <div id="discussion" class="discussion">
+        <h2>Discussion</h2>
+        <p>This is where the discussion about the radiology case will appear.</p>
+        <!-- You can add more discussion content here -->
+    </div>
+</div>
+
+<script>
+    function toggleDiscussion() {
+        var discussion = document.getElementById("discussion");
+        if (discussion.style.display === "none") {
+            discussion.style.display = "block";
+        } else {
+            discussion.style.display = "none";
+        }
+    }
+</script>
+
+</body>
+</html>
