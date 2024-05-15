@@ -65,11 +65,30 @@
             previousSlide();
         }
     });
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.addEventListener('touchstart', function(event) {
+        touchStartX = event.touches[0].clientX;
+    });
+
+    document.addEventListener('touchend', function(event) {
+        touchEndX = event.changedTouches[0].clientX;
+        handleGesture();
+    });
+
+    function handleGesture() {
+        if (touchEndX < touchStartX) {
+            nextSlide();
+        } else if (touchEndX > touchStartX) {
+            previousSlide();
+        }
+    }
 </script>
 
 </body>
 </html>
-
 
 
 <!--
