@@ -1,3 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Slide Presentation</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        .slides {
+            display: flex;
+            height: 100%;
+            width: 100%;
+            overflow-x: hidden;
+            scroll-snap-type: x mandatory;
+        }
+        
+        section {
+            scroll-snap-align: start;
+            flex-shrink: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="slides">
+        <section style="background-color: #ff8c00;">Slide 1</section>
+        <section style="background-color: #4caf50;">Slide 2</section>
+        <section style="background-color: #2196f3;">Slide 3</section>
+        <!-- Add more slides as needed -->
+    </div>
+
+    <script>
+        const slides = document.querySelector('.slides');
+
+        // Detect scroll event for mouse wheel
+        slides.addEventListener('wheel', function(event) {
+            if (event.deltaY > 0) {
+                slides.scrollLeft += window.innerWidth;
+            } else {
+                slides.scrollLeft -= window.innerWidth;
+            }
+        });
+
+        // Detect keydown event for arrow keys
+        document.addEventListener('keydown', function(event) {
+            if (event.keyCode === 37) { // Left arrow key
+                slides.scrollLeft -= window.innerWidth;
+            }
+            if (event.keyCode === 39) { // Right arrow key
+                slides.scrollLeft += window.innerWidth;
+            }
+        });
+    </script>
+</body>
+</html>
+
+<!--
 <html>
   <head>
     <title> Cerebral Venous Thrombosis </title>
@@ -14,4 +81,4 @@
  
   </body>
 </html>
-
+-->
