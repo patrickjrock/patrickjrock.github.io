@@ -25,17 +25,39 @@
             width: 100%;
             height: 100%;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            font-size: 2em;
+            font-size: 1.5em; /* Adjust font size */
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em; /* Larger font size for titles */
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 1.2em; /* Smaller font size for body text */
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
     <div class="slides">
-        <section style="background-color: #ff8c00;">Slide 1</section>
-        <section style="background-color: #4caf50;">Slide 2</section>
-        <section style="background-color: #2196f3;">Slide 3</section>
+        <section style="background-color: #ff8c00;">
+            <h1>Slide 1 Title</h1>
+            <p>This is the body of Slide 1. It contains information relevant to the topic being presented.</p>
+        </section>
+        <section style="background-color: #4caf50;">
+            <h1>Slide 2 Title</h1>
+            <p>This is the body of Slide 2. It contains more information relevant to the topic being presented.</p>
+        </section>
+        <section style="background-color: #2196f3;">
+            <h1>Slide 3 Title</h1>
+            <p>This is the body of Slide 3. It contains additional details about the topic being presented.</p>
+        </section>
         <!-- Add more slides as needed -->
     </div>
 
