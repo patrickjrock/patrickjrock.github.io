@@ -6,7 +6,7 @@
     <title>Random Monday Link</title>
 </head>
 <body>
-    <a id="randomLink" href="#" target="_blank">Go to random quiz</a>
+    <a id="randomLink" href="#" target="_blank" onclick="updateLink()">Go to Quiz</a>
 
     <script>
         function getRandomMondayBetweenDates(startDate, endDate) {
@@ -39,20 +39,25 @@
             return `${mm}${dd}${yyyy}`;
         }
 
-        // Define the date range
-        const today = new Date();
-        const pastDate = new Date('2011-05-09');
+        function updateLink() {
+            // Define the date range
+            const today = new Date();
+            const pastDate = new Date('2011-05-09');
 
-        // Get a random Monday
-        const randomMonday = getRandomMondayBetweenDates(pastDate, today);
+            // Get a random Monday
+            const randomMonday = getRandomMondayBetweenDates(pastDate, today);
 
-        // Construct the URL
-        const url = `https://www.ajnr.org/content/quiz/${randomMonday}qz`;
+            // Construct the URL
+            const url = `https://www.ajnr.org/content/quiz/${randomMonday}qz`;
 
-        // Update the hyperlink with the new URL
-        const linkElement = document.getElementById('randomLink');
-        linkElement.href = url;
-        // linkElement.textContent = `Go to Quiz for ${randomMonday}`;
+            // Update the hyperlink with the new URL
+            const linkElement = document.getElementById('randomLink');
+            linkElement.href = url;
+            linkElement.textContent = `Go to Quiz for ${randomMonday}`;
+        }
+
+        // Initialize the link
+        updateLink();
     </script>
 </body>
 </html>
