@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Monday Link</title>
+</head>
+<body>
+    <a id="randomLink" href="#" target="_blank">Go to Quiz</a>
+
+    <script>
+        function getRandomMondayBetweenDates(startDate, endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+
+            if (end < start) {
+                throw new Error('End date must be after start date');
+            }
+
+            function getNextMonday(date) {
+                const day = date.getDay();
+                const daysUntilMonday = (1 - day + 7) % 7;
+                date.setDate(date.getDate() + daysUntilMonday);
+                return date;
+            }
+
+            const timeDiff = end - start;
+            const daysBetween = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+
+            const randomDays = Math.floor(Math.random() * (daysBetween + 1));
+            const randomDate = new Date(start.getTime() + randomDays * (1000 * 60 * 60 * 24));
+
+            const nextMonday = getNextMonday(new Date(randomDate));
+
+            const mm = String(nextMonday.getMonth() + 1).padStart(2, '0');
+            const dd = String(nextMonday.getDate()).padStart(2, '0');
+            const yyyy = nextMonday.getFullYear();
+
+            return `${mm}${dd}${yyyy}`;
+        }
+
+        // Define the date range
+        const today = new Date();
+        const pastDate = new Date('2011-05-09');
+
+        // Get a random Monday
+        const randomMonday = getRandomMondayBetweenDates(pastDate, today);
+
+        // Construct the URL
+        const url = `https://www.ajnr.org/content/quiz/${randomMonday}qz`;
+
+        // Update the hyperlink with the new URL
+        const linkElement = document.getElementById('randomLink');
+        linkElement.href = url;
+        linkElement.textContent = `Go to Quiz for ${randomMonday}`;
+    </script>
+</body>
+</html>
