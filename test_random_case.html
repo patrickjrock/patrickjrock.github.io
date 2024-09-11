@@ -6,7 +6,7 @@
     <title>Random Monday Link</title>
 </head>
 <body>
-    <a id="randomLink" href="#" target="_blank">Go to Quiz</a>
+    <a id="randomLink" href="#" target="_blank">Go to random quiz</a>
 
     <script>
         function getRandomMondayBetweenDates(startDate, endDate) {
@@ -52,7 +52,7 @@
         // Update the hyperlink with the new URL
         const linkElement = document.getElementById('randomLink');
         linkElement.href = url;
-        linkElement.textContent = `Go to Quiz for ${randomMonday}`;
+        // linkElement.textContent = `Go to Quiz for ${randomMonday}`;
     </script>
 </body>
 </html>
