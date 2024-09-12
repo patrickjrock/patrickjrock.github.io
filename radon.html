@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radon Transform Visualization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #imageCanvas, #radonCanvas {
+            border: 1px solid #000;
+            display: block;
+            margin: 10px auto;
+        }
+        .controls {
+            text-align: center;
+        }
+        #pasteImage {
+            display: block;
+            margin: 0 auto 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Radon Transform Visualization</h1>
+    <input type="file" id="pasteImage" accept="image/*">
+    <canvas id="imageCanvas"></canvas>
+    <canvas id="radonCanvas"></canvas>
+    <div class="controls">
+        <button onclick="performRadonTransform()">Perform Radon Transform</button>
+    </div>
+
+    <script>
+        const imageCanvas = document.getElementById('imageCanvas');
+        const radonCanvas = document.getElementById('radonCanvas');
+        const imageCtx = imageCanvas.getContext('2d');
+        const radonCtx = radonCanvas.getContext('2d');
+
+        let image = new Image();
+
+        document.getElementById('pasteImage').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    image.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        image.onload = function() {
+            // Set canvas size based on image
+            imageCanvas.width = image.width;
+            imageCanvas.height = image.height;
+            imageCtx.drawImage(image, 0, 0);
+        }
+
+        function performRadonTransform() {
+            const width = imageCanvas.width;
+            const height = imageCanvas.height;
+            const imageData = imageCtx.getImageData(0, 0, width, height).data;
+            const data = new Uint8Array(width * height);
+
+            // Convert image to grayscale
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const index = (y * width + x) * 4;
+                    const gray = (imageData[index] + imageData[index + 1] + imageData[index + 2]) / 3;
+                    data[y * width + x] = gray;
+                }
+            }
+
+            // Radon transform implementation
+            const thetaMax = 180;
+            const sinogram = new Float32Array(width * thetaMax);
+            const center = [width / 2, height / 2];
+
+            for (let theta = 0; theta < thetaMax; theta++) {
+                const angle = theta * Math.PI / 180;
+                for (let r = -Math.sqrt(width * width + height * height); r < Math.sqrt(width * width + height * height); r++) {
+                    let sum = 0;
+                    for (let x = 0; x < width; x++) {
+                        for (let y = 0; y < height; y++) {
+                            const xOffset = x - center[0];
+                            const yOffset = y - center[1];
+                            const rOffset = xOffset * Math.cos(angle) + yOffset * Math.sin(angle);
+                            if (Math.abs(Math.round(rOffset) - r) < 1) {
+                                sum += data[y * width + x];
+                            }
+                        }
+                    }
+                    sinogram[theta * width + (r + Math.sqrt(width * width + height * height))] = sum;
+                }
+            }
+
+            // Render the sinogram
+            const radonWidth = thetaMax;
+            const radonHeight = Math.sqrt(width * width + height * height) * 2;
+            radonCanvas.width = radonWidth;
+            radonCanvas.height = radonHeight;
+            const radonImageData = radonCtx.createImageData(radonWidth, radonHeight);
+
+            for (let i = 0; i < radonWidth; i++) {
+                for (let j = 0; j < radonHeight; j++) {
+                    const index = (i + j * radonWidth) * 4;
+                    const value = sinogram[i * width + (j - Math.sqrt(width * width + height * height))];
+                    radonImageData.data[index] = value; // Red
+                    radonImageData.data[index + 1] = value; // Green
+                    radonImageData.data[index + 2] = value; // Blue
+                    radonImageData.data[index + 3] = 255;   // Alpha
+                }
+            }
+
+            radonCtx.putImageData(radonImageData, 0, 0);
+        }
+    </script>
+</body>
+</html>
