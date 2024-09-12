@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Precession Visualization</title>
+    <title>3D Precession with Relaxation</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -40,11 +40,19 @@
         <label for="gyromagneticRatio">Gyromagnetic Ratio (Hz/T):</label>
         <input type="number" id="gyromagneticRatio" value="42.58" step="0.01" min="0.01" max="100">
 
+        <label for="T1">T1 Relaxation (ms):</label>
+        <input type="number" id="T1" value="1000" step="10" min="10" max="10000">
+
+        <label for="T2">T2 Relaxation (ms):</label>
+        <input type="number" id="T2" value="1000" step="10" min="10" max="10000">
+
         <button onclick="updatePrecession()">Update Visualization</button>
     </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        let scene, camera, renderer, magneticField, gyromagneticRatio, magneticMoment, fieldVector, lineMaterial;
+        let scene, camera, renderer, magneticField, gyromagneticRatio, T1, T2, magneticMoment, fieldVector, lineMaterial;
+        let momentAngle = 0; // Initial angle for the magnetic moment
 
         function init() {
             // Set up the scene, camera, and renderer
@@ -76,14 +84,25 @@
         function updatePrecession() {
             magneticField = parseFloat(document.getElementById('magneticField').value);
             gyromagneticRatio = parseFloat(document.getElementById('gyromagneticRatio').value);
+            T1 = parseFloat(document.getElementById('T1').value) / 1000; // Convert ms to s
+            T2 = parseFloat(document.getElementById('T2').value) / 1000; // Convert ms to s
 
             const precessionFrequency = gyromagneticRatio * magneticField;
-
-            // Update the magnetic moment rotation to simulate precession
             let angle = performance.now() * 0.001 * precessionFrequency; // Adjust speed
 
-            fieldVector.rotation.z = Math.PI / 2; // Magnetic field along z-axis
-            magneticMoment.rotation.y = angle;
+            // Calculate decay factors
+            const decayFactorT1 = Math.exp(-performance.now() * 0.001 / T1);
+            const decayFactorT2 = Math.exp(-performance.now() * 0.001 / T2);
+
+            // Update the magnetic moment rotation to simulate precession with relaxation
+            momentAngle += 0.02 * precessionFrequency; // Increment angle for precession
+            magneticMoment.rotation.y = momentAngle;
+
+            // Simulate the relaxation effect
+            magneticMoment.rotation.y *= decayFactorT2;
+
+            // Update the orientation of the moment vector towards B0
+            magneticMoment.rotation.z += (0 - magneticMoment.rotation.z) * decayFactorT1;
 
             // Render the scene
             renderer.render(scene, camera);
