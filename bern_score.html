@@ -21,7 +21,12 @@
             margin-bottom: 5px;
         }
         .radio-group {
-            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .radio-group input {
+            margin-right: 5px;
         }
         .result {
             margin-top: 20px;
@@ -42,56 +47,44 @@
             <div class="form-group">
                 <label for="pachymeningealEnhancement">Pachymeningeal enhancement:</label>
                 <div class="radio-group">
-                    <input type="radio" id="pachymeningealEnhancementAbsent" name="pachymeningealEnhancement" value="0" required>
-                    <label for="pachymeningealEnhancementAbsent">Absent</label>
-                    <input type="radio" id="pachymeningealEnhancementPresent" name="pachymeningealEnhancement" value="1">
-                    <label for="pachymeningealEnhancementPresent">Present</label>
+                    <label><input type="radio" id="pachymeningealEnhancementAbsent" name="pachymeningealEnhancement" value="0" required> Absent</label>
+                    <label><input type="radio" id="pachymeningealEnhancementPresent" name="pachymeningealEnhancement" value="1"> Present</label>
                 </div>
             </div>
             <div class="form-group">
                 <label for="engorgementVenousSinus">Engorgement of venous sinus:</label>
                 <div class="radio-group">
-                    <input type="radio" id="engorgementVenousSinusAbsent" name="engorgementVenousSinus" value="0" required>
-                    <label for="engorgementVenousSinusAbsent">Absent</label>
-                    <input type="radio" id="engorgementVenousSinusPresent" name="engorgementVenousSinus" value="1">
-                    <label for="engorgementVenousSinusPresent">Present</label>
+                    <label><input type="radio" id="engorgementVenousSinusAbsent" name="engorgementVenousSinus" value="0" required> Absent</label>
+                    <label><input type="radio" id="engorgementVenousSinusPresent" name="engorgementVenousSinus" value="1"> Present</label>
                 </div>
             </div>
             <div class="form-group">
                 <label for="suprasellarCistern">Suprasellar cistern 4.0 mm or less:</label>
                 <div class="radio-group">
-                    <input type="radio" id="suprasellarCisternAbsent" name="suprasellarCistern" value="0" required>
-                    <label for="suprasellarCisternAbsent">Absent</label>
-                    <input type="radio" id="suprasellarCisternPresent" name="suprasellarCistern" value="1">
-                    <label for="suprasellarCisternPresent">Present</label>
+                    <label><input type="radio" id="suprasellarCisternAbsent" name="suprasellarCistern" value="0" required> Absent</label>
+                    <label><input type="radio" id="suprasellarCisternPresent" name="suprasellarCistern" value="1"> Present</label>
                 </div>
             </div>
             <h2>Minor Criteria (1 point each)</h2>
             <div class="form-group">
                 <label for="subduralFluidCollection">Subdural fluid collection:</label>
                 <div class="radio-group">
-                    <input type="radio" id="subduralFluidCollectionAbsent" name="subduralFluidCollection" value="0" required>
-                    <label for="subduralFluidCollectionAbsent">Absent</label>
-                    <input type="radio" id="subduralFluidCollectionPresent" name="subduralFluidCollection" value="1">
-                    <label for="subduralFluidCollectionPresent">Present</label>
+                    <label><input type="radio" id="subduralFluidCollectionAbsent" name="subduralFluidCollection" value="0" required> Absent</label>
+                    <label><input type="radio" id="subduralFluidCollectionPresent" name="subduralFluidCollection" value="1"> Present</label>
                 </div>
             </div>
             <div class="form-group">
                 <label for="prepontineCistern">Prepontine cistern 5.0 mm or less:</label>
                 <div class="radio-group">
-                    <input type="radio" id="prepontineCisternAbsent" name="prepontineCistern" value="0" required>
-                    <label for="prepontineCisternAbsent">Absent</label>
-                    <input type="radio" id="prepontineCisternPresent" name="prepontineCistern" value="1">
-                    <label for="prepontineCisternPresent">Present</label>
+                    <label><input type="radio" id="prepontineCisternAbsent" name="prepontineCistern" value="0" required> Absent</label>
+                    <label><input type="radio" id="prepontineCisternPresent" name="prepontineCistern" value="1"> Present</label>
                 </div>
             </div>
             <div class="form-group">
                 <label for="mamillopontineDistance">Mamillopontine distance 6.5 mm or less:</label>
                 <div class="radio-group">
-                    <input type="radio" id="mamillopontineDistanceAbsent" name="mamillopontineDistance" value="0" required>
-                    <label for="mamillopontineDistanceAbsent">Absent</label>
-                    <input type="radio" id="mamillopontineDistancePresent" name="mamillopontineDistance" value="1">
-                    <label for="mamillopontineDistancePresent">Present</label>
+                    <label><input type="radio" id="mamillopontineDistanceAbsent" name="mamillopontineDistance" value="0" required> Absent</label>
+                    <label><input type="radio" id="mamillopontineDistancePresent" name="mamillopontineDistance" value="1"> Present</label>
                 </div>
             </div>
             <button type="button" onclick="calculateBernScore()">Calculate Bern Score</button>
