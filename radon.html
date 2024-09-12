@@ -19,10 +19,6 @@
             padding: 10px;
             border-radius: 5px;
         }
-        .controls label {
-            display: block;
-            margin-bottom: 5px;
-        }
         .controls button {
             margin-top: 10px;
         }
@@ -39,7 +35,7 @@
     </div>
 
     <canvas id="drawCanvas" width="500" height="500"></canvas>
-    <canvas id="radonCanvas" width="500" height="500"></canvas>
+    <canvas id="radonCanvas"></canvas>
 
     <script>
         const drawCanvas = document.getElementById('drawCanvas');
@@ -75,43 +71,50 @@
             const width = drawCanvas.width;
             const height = drawCanvas.height;
             const imageData = drawCtx.getImageData(0, 0, width, height).data;
-            const data = new Uint8Array(width * height);
+            const grayData = new Float32Array(width * height);
 
             // Convert image to grayscale
             for (let y = 0; y < height; y++) {
                 for (let x = 0; x < width; x++) {
                     const index = (y * width + x) * 4;
                     const gray = (imageData[index] + imageData[index + 1] + imageData[index + 2]) / 3;
-                    data[y * width + x] = gray;
+                    grayData[y * width + x] = gray;
                 }
             }
 
-            // Radon transform implementation
+            // Radon transform parameters
             const thetaMax = 180;
-            const sinogram = new Float32Array(width * thetaMax);
-            const center = [width / 2, height / 2];
+            const maxDistance = Math.sqrt(width * width + height * height);
+            const sinogram = new Float32Array(thetaMax * (2 * maxDistance));
 
+            // Radon transform computation
             for (let theta = 0; theta < thetaMax; theta++) {
                 const angle = theta * Math.PI / 180;
-                for (let r = -Math.sqrt(width * width + height * height); r < Math.sqrt(width * width + height * height); r++) {
+                const cosAngle = Math.cos(angle);
+                const sinAngle = Math.sin(angle);
+
+                for (let r = -maxDistance; r < maxDistance; r++) {
                     let sum = 0;
+
                     for (let x = 0; x < width; x++) {
                         for (let y = 0; y < height; y++) {
-                            const xOffset = x - center[0];
-                            const yOffset = y - center[1];
-                            const rOffset = xOffset * Math.cos(angle) + yOffset * Math.sin(angle);
-                            if (Math.abs(Math.round(rOffset) - r) < 1) {
-                                sum += data[y * width + x];
+                            const xShift = x - width / 2;
+                            const yShift = y - height / 2;
+                            const distance = xShift * cosAngle + yShift * sinAngle;
+                            
+                            if (Math.abs(Math.round(distance) - r) < 1) {
+                                sum += grayData[y * width + x];
                             }
                         }
                     }
-                    sinogram[theta * width + (r + Math.sqrt(width * width + height * height))] = sum;
+                    
+                    sinogram[theta * (2 * maxDistance) + (r + maxDistance)] = sum;
                 }
             }
 
             // Render the sinogram
             const radonWidth = thetaMax;
-            const radonHeight = Math.sqrt(width * width + height * height) * 2;
+            const radonHeight = 2 * maxDistance;
             radonCanvas.width = radonWidth;
             radonCanvas.height = radonHeight;
             const radonImageData = radonCtx.createImageData(radonWidth, radonHeight);
@@ -119,7 +122,7 @@
             for (let i = 0; i < radonWidth; i++) {
                 for (let j = 0; j < radonHeight; j++) {
                     const index = (i + j * radonWidth) * 4;
-                    const value = sinogram[i * width + (j - Math.sqrt(width * width + height * height))];
+                    const value = Math.min(255, sinogram[i * radonHeight + j] / 10); // Normalize for visibility
                     radonImageData.data[index] = value; // Red
                     radonImageData.data[index + 1] = value; // Green
                     radonImageData.data[index + 2] = value; // Blue
@@ -132,3 +135,4 @@
     </script>
 </body>
 </html>
+
