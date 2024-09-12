@@ -3,65 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radon Transform Visualization</title>
+    <title>Radon Transform with Drawing Canvas</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        #imageCanvas, #radonCanvas {
-            border: 1px solid #000;
-            display: block;
-            margin: 10px auto;
+            margin: 0;
+            overflow: hidden;
         }
         .controls {
-            text-align: center;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
         }
-        #pasteImage {
+        .controls label {
             display: block;
-            margin: 0 auto 20px;
+            margin-bottom: 5px;
+        }
+        .controls button {
+            margin-top: 10px;
+        }
+        canvas {
+            border: 1px solid #000;
+            display: block;
+            margin: 20px auto;
         }
     </style>
 </head>
 <body>
-    <h1>Radon Transform Visualization</h1>
-    <input type="file" id="pasteImage" accept="image/*">
-    <canvas id="imageCanvas"></canvas>
-    <canvas id="radonCanvas"></canvas>
     <div class="controls">
         <button onclick="performRadonTransform()">Perform Radon Transform</button>
     </div>
 
+    <canvas id="drawCanvas" width="500" height="500"></canvas>
+    <canvas id="radonCanvas" width="500" height="500"></canvas>
+
     <script>
-        const imageCanvas = document.getElementById('imageCanvas');
+        const drawCanvas = document.getElementById('drawCanvas');
         const radonCanvas = document.getElementById('radonCanvas');
-        const imageCtx = imageCanvas.getContext('2d');
+        const drawCtx = drawCanvas.getContext('2d');
         const radonCtx = radonCanvas.getContext('2d');
 
-        let image = new Image();
+        let drawing = false;
 
-        document.getElementById('pasteImage').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    image.src = e.target.result;
-                }
-                reader.readAsDataURL(file);
+        // Drawing on the canvas
+        drawCanvas.addEventListener('mousedown', () => {
+            drawing = true;
+        });
+
+        drawCanvas.addEventListener('mouseup', () => {
+            drawing = false;
+            drawCtx.beginPath();
+        });
+
+        drawCanvas.addEventListener('mousemove', (event) => {
+            if (drawing) {
+                drawCtx.lineWidth = 5;
+                drawCtx.lineCap = 'round';
+                drawCtx.strokeStyle = '#000';
+                drawCtx.lineTo(event.clientX - drawCanvas.offsetLeft, event.clientY - drawCanvas.offsetTop);
+                drawCtx.stroke();
+                drawCtx.beginPath();
+                drawCtx.moveTo(event.clientX - drawCanvas.offsetLeft, event.clientY - drawCanvas.offsetTop);
             }
         });
 
-        image.onload = function() {
-            // Set canvas size based on image
-            imageCanvas.width = image.width;
-            imageCanvas.height = image.height;
-            imageCtx.drawImage(image, 0, 0);
-        }
-
         function performRadonTransform() {
-            const width = imageCanvas.width;
-            const height = imageCanvas.height;
-            const imageData = imageCtx.getImageData(0, 0, width, height).data;
+            const width = drawCanvas.width;
+            const height = drawCanvas.height;
+            const imageData = drawCtx.getImageData(0, 0, width, height).data;
             const data = new Uint8Array(width * height);
 
             // Convert image to grayscale
