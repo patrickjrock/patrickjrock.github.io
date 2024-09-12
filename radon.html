@@ -34,7 +34,7 @@
         <button onclick="performRadonTransform()">Perform Radon Transform</button>
     </div>
 
-    <canvas id="drawCanvas" width="500" height="500"></canvas>
+    <canvas id="drawCanvas" width="200" height="200"></canvas>
     <canvas id="radonCanvas"></canvas>
 
     <script>
@@ -85,7 +85,7 @@
             // Radon transform parameters
             const thetaMax = 180;
             const maxDistance = Math.sqrt(width * width + height * height);
-            const sinogram = new Float32Array(thetaMax * (2 * maxDistance));
+            const sinogram = new Float32Array(thetaMax * Math.ceil(maxDistance * 2));
 
             // Radon transform computation
             for (let theta = 0; theta < thetaMax; theta++) {
@@ -93,7 +93,7 @@
                 const cosAngle = Math.cos(angle);
                 const sinAngle = Math.sin(angle);
 
-                for (let r = -maxDistance; r < maxDistance; r++) {
+                for (let r = -Math.ceil(maxDistance); r < Math.ceil(maxDistance); r++) {
                     let sum = 0;
 
                     for (let x = 0; x < width; x++) {
@@ -108,13 +108,13 @@
                         }
                     }
                     
-                    sinogram[theta * (2 * maxDistance) + (r + maxDistance)] = sum;
+                    sinogram[theta * Math.ceil(maxDistance * 2) + (r + Math.ceil(maxDistance))] = sum;
                 }
             }
 
             // Render the sinogram
             const radonWidth = thetaMax;
-            const radonHeight = 2 * maxDistance;
+            const radonHeight = Math.ceil(maxDistance * 2);
             radonCanvas.width = radonWidth;
             radonCanvas.height = radonHeight;
             const radonImageData = radonCtx.createImageData(radonWidth, radonHeight);
@@ -135,4 +135,3 @@
     </script>
 </body>
 </html>
-
