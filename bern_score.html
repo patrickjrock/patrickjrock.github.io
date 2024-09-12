@@ -20,9 +20,17 @@
             display: block;
             margin-bottom: 5px;
         }
+        .radio-group {
+            margin: 10px 0;
+        }
         .result {
             margin-top: 20px;
             font-size: 1.2em;
+        }
+        .reference {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #555;
         }
     </style>
 </head>
@@ -32,44 +40,77 @@
         <form id="bern-form">
             <h2>Major Criteria (2 points each)</h2>
             <div class="form-group">
-                <label for="pachymeningealEnhancement">Pachymeningeal enhancement (0 = Absent, 1 = Present):</label>
-                <input type="number" id="pachymeningealEnhancement" min="0" max="1" required>
+                <label for="pachymeningealEnhancement">Pachymeningeal enhancement:</label>
+                <div class="radio-group">
+                    <input type="radio" id="pachymeningealEnhancementAbsent" name="pachymeningealEnhancement" value="0" required>
+                    <label for="pachymeningealEnhancementAbsent">Absent</label>
+                    <input type="radio" id="pachymeningealEnhancementPresent" name="pachymeningealEnhancement" value="1">
+                    <label for="pachymeningealEnhancementPresent">Present</label>
+                </div>
             </div>
             <div class="form-group">
-                <label for="engorgementVenousSinus">Engorgement of venous sinus (0 = Absent, 1 = Present):</label>
-                <input type="number" id="engorgementVenousSinus" min="0" max="1" required>
+                <label for="engorgementVenousSinus">Engorgement of venous sinus:</label>
+                <div class="radio-group">
+                    <input type="radio" id="engorgementVenousSinusAbsent" name="engorgementVenousSinus" value="0" required>
+                    <label for="engorgementVenousSinusAbsent">Absent</label>
+                    <input type="radio" id="engorgementVenousSinusPresent" name="engorgementVenousSinus" value="1">
+                    <label for="engorgementVenousSinusPresent">Present</label>
+                </div>
             </div>
             <div class="form-group">
-                <label for="suprasellarCistern">Suprasellar cistern 4.0 mm or less (0 = Absent, 1 = Present):</label>
-                <input type="number" id="suprasellarCistern" min="0" max="1" required>
+                <label for="suprasellarCistern">Suprasellar cistern 4.0 mm or less:</label>
+                <div class="radio-group">
+                    <input type="radio" id="suprasellarCisternAbsent" name="suprasellarCistern" value="0" required>
+                    <label for="suprasellarCisternAbsent">Absent</label>
+                    <input type="radio" id="suprasellarCisternPresent" name="suprasellarCistern" value="1">
+                    <label for="suprasellarCisternPresent">Present</label>
+                </div>
             </div>
             <h2>Minor Criteria (1 point each)</h2>
             <div class="form-group">
-                <label for="subduralFluidCollection">Subdural fluid collection (0 = Absent, 1 = Present):</label>
-                <input type="number" id="subduralFluidCollection" min="0" max="1" required>
+                <label for="subduralFluidCollection">Subdural fluid collection:</label>
+                <div class="radio-group">
+                    <input type="radio" id="subduralFluidCollectionAbsent" name="subduralFluidCollection" value="0" required>
+                    <label for="subduralFluidCollectionAbsent">Absent</label>
+                    <input type="radio" id="subduralFluidCollectionPresent" name="subduralFluidCollection" value="1">
+                    <label for="subduralFluidCollectionPresent">Present</label>
+                </div>
             </div>
             <div class="form-group">
-                <label for="prepontineCistern">Prepontine cistern 5.0 mm or less (0 = Absent, 1 = Present):</label>
-                <input type="number" id="prepontineCistern" min="0" max="1" required>
+                <label for="prepontineCistern">Prepontine cistern 5.0 mm or less:</label>
+                <div class="radio-group">
+                    <input type="radio" id="prepontineCisternAbsent" name="prepontineCistern" value="0" required>
+                    <label for="prepontineCisternAbsent">Absent</label>
+                    <input type="radio" id="prepontineCisternPresent" name="prepontineCistern" value="1">
+                    <label for="prepontineCisternPresent">Present</label>
+                </div>
             </div>
             <div class="form-group">
-                <label for="mamillopontineDistance">Mamillopontine distance 6.5 mm or less (0 = Absent, 1 = Present):</label>
-                <input type="number" id="mamillopontineDistance" min="0" max="1" required>
+                <label for="mamillopontineDistance">Mamillopontine distance 6.5 mm or less:</label>
+                <div class="radio-group">
+                    <input type="radio" id="mamillopontineDistanceAbsent" name="mamillopontineDistance" value="0" required>
+                    <label for="mamillopontineDistanceAbsent">Absent</label>
+                    <input type="radio" id="mamillopontineDistancePresent" name="mamillopontineDistance" value="1">
+                    <label for="mamillopontineDistancePresent">Present</label>
+                </div>
             </div>
             <button type="button" onclick="calculateBernScore()">Calculate Bern Score</button>
         </form>
         <div class="result" id="result"></div>
+        <div class="reference">
+            <p>Reference: Dobrocky T, Grunder L, Breiding PS, et al. Assessing Spinal Cerebrospinal Fluid Leaks in Spontaneous Intracranial Hypotension With a Scoring System Based on Brain Magnetic Resonance Imaging Findings. JAMA Neurol. 2019;76(5):580-587. doi:10.1001/jamaneurol.2018.4921</p>
+        </div>
     </div>
 
     <script>
         function calculateBernScore() {
             // Retrieve values from form
-            const pachymeningealEnhancement = parseInt(document.getElementById('pachymeningealEnhancement').value) || 0;
-            const engorgementVenousSinus = parseInt(document.getElementById('engorgementVenousSinus').value) || 0;
-            const suprasellarCistern = parseInt(document.getElementById('suprasellarCistern').value) || 0;
-            const subduralFluidCollection = parseInt(document.getElementById('subduralFluidCollection').value) || 0;
-            const prepontineCistern = parseInt(document.getElementById('prepontineCistern').value) || 0;
-            const mamillopontineDistance = parseInt(document.getElementById('mamillopontineDistance').value) || 0;
+            const pachymeningealEnhancement = parseInt(document.querySelector('input[name="pachymeningealEnhancement"]:checked').value) || 0;
+            const engorgementVenousSinus = parseInt(document.querySelector('input[name="engorgementVenousSinus"]:checked').value) || 0;
+            const suprasellarCistern = parseInt(document.querySelector('input[name="suprasellarCistern"]:checked').value) || 0;
+            const subduralFluidCollection = parseInt(document.querySelector('input[name="subduralFluidCollection"]:checked').value) || 0;
+            const prepontineCistern = parseInt(document.querySelector('input[name="prepontineCistern"]:checked').value) || 0;
+            const mamillopontineDistance = parseInt(document.querySelector('input[name="mamillopontineDistance"]:checked').value) || 0;
 
             // Calculate total score
             const majorScore = (2 - pachymeningealEnhancement) * 2 +
@@ -82,8 +123,21 @@
 
             const totalScore = majorScore + minorScore;
 
+            // Determine probability and summary
+            let probability;
+            if (totalScore <= 2) {
+                probability = 'low probability (0-7%)';
+            } else if (totalScore <= 4) {
+                probability = 'intermediate probability';
+            } else {
+                probability = 'high probability (67-100%)';
+            }
+
             // Display result
-            document.getElementById('result').textContent = 'Total Bern Score: ' + totalScore;
+            document.getElementById('result').innerHTML = `
+                Total Bern Score: ${totalScore}<br>
+                Summary: The Bern Score suggests ${probability} of intracranial hypotension.
+            `;
         }
     </script>
 </body>
