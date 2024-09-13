@@ -86,29 +86,35 @@
             const thetaMax = 180;
             const maxDistance = Math.sqrt(width * width + height * height);
             const sinogram = new Float32Array(thetaMax * Math.ceil(maxDistance * 2));
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            function sampleLine(theta, s) {
+                const cosTheta = Math.cos(theta);
+                const sinTheta = Math.sin(theta);
+                let sum = 0;
+                let count = 0;
+
+                for (let t = -10; t <= 10; t++) {
+                    const x = centerX + s * cosTheta - t * sinTheta;
+                    const y = centerY + s * sinTheta + t * cosTheta;
+
+                    if (x >= 0 && x < width && y >= 0 && y < height) {
+                        const index = Math.floor(y) * width + Math.floor(x);
+                        sum += grayData[index];
+                        count++;
+                    }
+                }
+                return count > 0 ? sum / count : 0;
+            }
 
             // Radon transform computation
             for (let theta = 0; theta < thetaMax; theta++) {
                 const angle = theta * Math.PI / 180;
-                const cosAngle = Math.cos(angle);
-                const sinAngle = Math.sin(angle);
-
                 for (let r = -Math.ceil(maxDistance); r < Math.ceil(maxDistance); r++) {
-                    let sum = 0;
-
-                    for (let x = 0; x < width; x++) {
-                        for (let y = 0; y < height; y++) {
-                            const xShift = x - width / 2;
-                            const yShift = y - height / 2;
-                            const distance = xShift * cosAngle + yShift * sinAngle;
-                            
-                            if (Math.abs(Math.round(distance) - r) < 1) {
-                                sum += grayData[y * width + x];
-                            }
-                        }
-                    }
-                    
-                    sinogram[theta * Math.ceil(maxDistance * 2) + (r + Math.ceil(maxDistance))] = sum;
+                    const s = r;
+                    const projection = sampleLine(angle, s);
+                    sinogram[theta * Math.ceil(maxDistance * 2) + (r + Math.ceil(maxDistance))] = projection;
                 }
             }
 
