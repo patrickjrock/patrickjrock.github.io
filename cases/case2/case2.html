@@ -18,23 +18,23 @@
     </style>
 </head>
 <body>
-    <img src="coronal_t1_post.jpg">
+    <img src="coronal_t1_post.jpg" width=50%>
     <hr>
     <h3>What is the most likely diagnosis?</h3>
     <br>
     <button id="reveal-button">Reveal Options</button>
     <form id="quiz-form" class="hidden">
         <label>
-            <input type="radio" name="color" value="red"> Red
+            <input type="radio" name="correct" value="n"> Meningioma
         </label><br>
         <label>
-            <input type="radio" name="color" value="blue"> Blue
+            <input type="radio" name="correct" value="y"> Pituitary macroadenoma
         </label><br>
         <label>
-            <input type="radio" name="color" value="green"> Green
+            <input type="radio" name="correct" value="n"> Craniopharyngioma
         </label><br>
         <label>
-            <input type="radio" name="color" value="yellow"> Yellow
+            <input type="radio" name="correct" value="n"> Rathke's cleft cyst
         </label><br>
         <button type="submit">Submit</button>
     </form>
@@ -48,14 +48,14 @@
 
         document.getElementById('quiz-form').addEventListener('submit', function(event) {
             event.preventDefault(); // Prevent form submission
-            const selectedValue = document.querySelector('input[name="color"]:checked');
+            const selectedValue = document.querySelector('input[name="correct"]:checked');
             const resultDiv = document.getElementById('result');
 
             if (selectedValue) {
-                if (selectedValue.value === 'blue') {
-                    resultDiv.innerHTML = "<p class='correct'>Correct! Blue is your favorite color.</p>";
+                if (selectedValue.value === 'r') {
+                    resultDiv.innerHTML = "<p class='correct'>Correct!</p>";
                 } else {
-                    resultDiv.innerHTML = "<p class='incorrect'>Incorrect! The correct answer is Blue.</p>";
+                    resultDiv.innerHTML = "<p class='incorrect'>Incorrect.</p>";
                 }
             } else {
                 resultDiv.innerHTML = "<p class='incorrect'>Please select an answer.</p>";
