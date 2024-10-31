@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .correct {
+            color: green;
+            font-weight: bold;
+        }
+        .incorrect {
+            color: red;
+            font-weight: bold;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <img src="ap.png" width='400'>
+    <img src="lateral.png" width='400'>
+
+    <hr>
+    <h3>What material  composes these fragments?</h3>
+    <br>
+    <button id="reveal-button">Reveal Options</button>
+    <form id="quiz-form" class="hidden">
+        <label>
+            <input type="radio" name="correct" value="y"> Lead
+        </label><br>
+        <label>
+            <input type="radio" name="correct" value="n"> Steel
+        </label><br>
+        <label>
+            <input type="radio" name="correct" value="n"> Bone
+        </label><br>
+        <label>
+            <input type="radio" name="correct" value="n"> Titanium
+        </label><br>
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('reveal-button').addEventListener('click', function() {
+            document.getElementById('quiz-form').classList.remove('hidden');
+            this.style.display = 'none'; // Hide the reveal button after revealing the options
+        });
+
+        document.getElementById('quiz-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form submission
+            const selectedValue = document.querySelector('input[name="correct"]:checked');
+            const resultDiv = document.getElementById('result');
+
+            if (selectedValue) {
+                if (selectedValue.value === 'y') {
+                    resultDiv.innerHTML = "<p class='correct'>Correct!</p><p><a href='https://www.ajronline.org/doi/full/10.2214/AJR.20.23648'>Imaging Appearance of Ballistic Wounds Predicts Bullet Composition: Implications for MRI Safety</a></p>"
+                } else {
+                    resultDiv.innerHTML = "<p class='incorrect'>Incorrect.</p>";
+                }
+            } else {
+                resultDiv.innerHTML = "<p class='incorrect'>Please select an answer.</p>";
+            }
+        });
+    </script>
+</body>
+</html>
