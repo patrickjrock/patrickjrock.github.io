@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .correct {
+            color: green;
+            font-weight: bold;
+        }
+        .incorrect {
+            color: red;
+            font-weight: bold;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <img src="jugular.png" width='600'>
+    <p>A 79 year old woman presents with right sided pulsatile tinnitus</p>
+    <hr>
+    <h3>What is the most likely diagnosis?</h3>
+    <br>
+    <button id="reveal-button">Reveal Options</button>
+    <form id="quiz-form" class="hidden">
+        <label>
+            <input type="radio" name="correct" value="y"> Cholesteatoma
+        </label><br>
+        <label>
+            <input type="radio" name="correct" value="n"> Arachnoid cyst
+        </label><br>
+        <label>
+            <input type="radio" name="correct" value="n"> Abberent internal carotid artery
+        </label><br>
+        <label>
+            <input type="radio" name="correct" value="y"> Dehiscent jugular bulb
+        </label><br>
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('reveal-button').addEventListener('click', function() {
+            document.getElementById('quiz-form').classList.remove('hidden');
+            this.style.display = 'none'; // Hide the reveal button after revealing the options
+        });
+
+        document.getElementById('quiz-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form submission
+            const selectedValue = document.querySelector('input[name="correct"]:checked');
+            const resultDiv = document.getElementById('result');
+
+            if (selectedValue) {
+                if (selectedValue.value === 'y') {
+                    resultDiv.innerHTML = "<p class='correct'>Correct!</p>";
+                } else {
+                    resultDiv.innerHTML = "<p class='incorrect'>Incorrect.</p>";
+                }
+            } else {
+                resultDiv.innerHTML = "<p class='incorrect'>Please select an answer.</p>";
+            }
+        });
+    </script>
+</body>
+</html>
