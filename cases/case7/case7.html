@@ -19,10 +19,10 @@
     </style>
 </head>
 <body>
-    <img src="sccd.png" width='800'>
+    <img src="sccd.png" width='500'>
 
     <hr>
-    <h3>What material  composes these fragments?</h3>
+    <h3>What is the most likely diagnosis?</h3>
     <br>
     <button id="reveal-button">Reveal Options</button>
     <form id="quiz-form" class="hidden">
@@ -56,7 +56,7 @@
 
             if (selectedValue) {
                 if (selectedValue.value === 'y') {
-                    resultDiv.innerHTML = "<p class='correct'>Correct!</p><p><a href='https://www.ajronline.org/doi/full/10.2214/AJR.20.23648'>Imaging Appearance of Ballistic Wounds Predicts Bullet Composition: Implications for MRI Safety</a></p>"
+                    resultDiv.innerHTML = "<p class='correct'>Correct!</p><p><a href='https://www.ajnr.org/content/38/1/2'>Spectrum of Third Window Abnormalities: Semicircular Canal Dehiscence and Beyond</a></p>"
                 } else {
                     resultDiv.innerHTML = "<p class='incorrect'>Incorrect.</p>";
                 }
