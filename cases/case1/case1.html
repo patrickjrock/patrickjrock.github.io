@@ -1,3 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .correct {
+            color: green;
+            font-weight: bold;
+        }
+        .incorrect {
+            color: red;
+            font-weight: bold;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+        <img src="images/arterial_axial.jpg">
+        <img src="images/arterial_coronal.jpg">
+        <img src="images/parathyroid_immediate.jpg">
+        <img src="images/parathyroid_delay.jpg">
+        <img src="images/ultrasound.jpg" alt="arterial phase">
+     A 58 year old woman with a history of primary hyperparathyroidism.
+    <hr>
+    <h3>What is the most likely diagnosis?</h3>
+    <br>
+    <button id="reveal-button">Reveal Options</button>
+    <form id="quiz-form" class="hidden">
+        <label>
+            <input type="radio" name="correct" value="n"> Colloid cyst
+        </label><br>
+        <label>
+            <input type="radio" name="correct" value="n"> Parathyroid adenoma
+        </label><br>
+        <label>
+            <input type="radio" name="correct" value="y"> Parathyroid carcinoma
+        </label><br>
+        <label>
+            <input type="radio" name="correct" value="n"> Papillary thyroid carcinoma
+        </label><br>
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('reveal-button').addEventListener('click', function() {
+            document.getElementById('quiz-form').classList.remove('hidden');
+            this.style.display = 'none'; // Hide the reveal button after revealing the options
+        });
+
+        document.getElementById('quiz-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form submission
+            const selectedValue = document.querySelector('input[name="correct"]:checked');
+            const resultDiv = document.getElementById('result');
+
+            if (selectedValue) {
+                if (selectedValue.value === 'y') {
+                    resultDiv.innerHTML = "<p class='correct'>Correct!</p>";
+                } else {
+                    resultDiv.innerHTML = "<p class='incorrect'>Incorrect.</p>";
+                }
+            } else {
+                resultDiv.innerHTML = "<p class='incorrect'>Please select an answer.</p>";
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--
+
+
+
+
+=================
 
 <!DOCTYPE html>
 <html lang="en">
@@ -113,3 +205,4 @@
 
 </body>
 </html>
+-->
