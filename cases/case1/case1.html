@@ -18,11 +18,11 @@
     </style>
 </head>
 <body>
-        <img src="images/arterial_axial.jpg">
-        <img src="images/arterial_coronal.jpg">
-        <img src="images/parathyroid_immediate.jpg">
-        <img src="images/parathyroid_delay.jpg">
-        <img src="images/ultrasound.jpg" alt="arterial phase">
+        <img src="images/arterial_axial.jpg" width='200'>
+        <img src="images/arterial_coronal.jpg" width='200'>
+        <img src="images/parathyroid_immediate.jpg" width='200'>
+        <img src="images/parathyroid_delay.jpg" width='200'>
+        <img src="images/ultrasound.jpg" alt="arterial phase" width='200'>
      A 58 year old woman with a history of primary hyperparathyroidism.
     <hr>
     <h3>What is the most likely diagnosis?</h3>
@@ -33,7 +33,7 @@
             <input type="radio" name="correct" value="n"> Colloid cyst
         </label><br>
         <label>
-            <input type="radio" name="correct" value="n"> Parathyroid adenoma
+            <input type="radio" name="correct" value="n"> Squamous cell carcinoma
         </label><br>
         <label>
             <input type="radio" name="correct" value="y"> Parathyroid carcinoma
@@ -59,7 +59,7 @@
 
             if (selectedValue) {
                 if (selectedValue.value === 'y') {
-                    resultDiv.innerHTML = "<p class='correct'>Correct!</p>";
+                    resultDiv.innerHTML = "<p class='correct'>Correct!</p> Can we differentiate this from a parathyroid adenoma?: Sidhu PS, Talat N, Patel P, Mulholland NJ, Schulte KM. <a href='https://pubmed.ncbi.nlm.nih.gov/21556910/'> Ultrasound features of malignancy in the preoperative diagnosis of parathyroid cancer: a retrospective analysis of parathyroid tumours larger than 15 mm</a>. <i>Eur Radiol</i>. 2011;21(9):1865-1873. doi:10.1007/s00330-011-2141-3 ";
                 } else {
                     resultDiv.innerHTML = "<p class='incorrect'>Incorrect.</p>";
                 }
