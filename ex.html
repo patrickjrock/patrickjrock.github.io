@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visualization of Complex Exponential</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 20px;
+    }
+
+    #controls {
+      margin-top: 20px;
+    }
+
+    label {
+      margin-right: 10px;
+    }
+
+    .slider {
+      width: 200px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Visualization of \( e^{-2\pi i (x k_x + y k_y)} \)</h1>
+  <p>Use the sliders to adjust \( k_x \) and \( k_y \) values.</p>
+  <div id="controls">
+    <div>
+      <label for="kx">\( k_x \):</label>
+      <input id="kx" class="slider" type="range" min="-5" max="5" value="1" step="0.1">
+      <span id="kx-value">1</span>
+    </div>
+    <div>
+      <label for="ky">\( k_y \):</label>
+      <input id="ky" class="slider" type="range" min="-5" max="5" value="1" step="0.1">
+      <span id="ky-value">1</span>
+    </div>
+  </div>
+
+  <script>
+    let kxSlider, kySlider;
+    let kx = 1, ky = 1;
+    let zoomFactor = 10;  // Increase the zoom factor to zoom in
+
+    function setup() {
+      createCanvas(400, 400);
+      kxSlider = select('#kx');
+      kySlider = select('#ky');
+      kxSlider.input(updateValues);
+      kySlider.input(updateValues);
+      noLoop();
+    }
+
+    function updateValues() {
+      kx = float(kxSlider.value());
+      ky = float(kySlider.value());
+      select('#kx-value').html(kx);
+      select('#ky-value').html(ky);
+      redraw();
+    }
+
+    function draw() {
+      background(255);
+
+      // Loop over every pixel in the canvas
+      loadPixels();
+      for (let x = 0; x < width; x++) {
+        for (let y = 0; y < height; y++) {
+          // Map pixel coordinates to x, y values with zoomFactor applied
+          let normalizedX = map(x, 0, width, -zoomFactor, zoomFactor);
+          let normalizedY = map(y, 0, height, -zoomFactor, zoomFactor);
+
+          // Calculate the complex exponential for each pixel
+          let phase = -2 * Math.PI * (normalizedX * kx + normalizedY * ky);
+          let real = cos(phase);  // Real part
+          let imag = sin(phase);  // Imaginary part
+
+          // Map the real and imaginary parts to color values
+          let r = map(real, -1, 1, 0, 255);
+          let g = map(imag, -1, 1, 0, 255);
+          let b = 150; // Keep blue constant for visual clarity
+
+          // Set the pixel color at (x, y)
+          let pix = (x + y * width) * 4;
+          pixels[pix + 0] = r;  // Red channel
+          pixels[pix + 1] = g;  // Green channel
+          pixels[pix + 2] = b;  // Blue channel
+          pixels[pix + 3] = 255; // Alpha channel (opacity)
+        }
+      }
+      updatePixels();
+    }
+  </script>
+
+</body>
+</html>
