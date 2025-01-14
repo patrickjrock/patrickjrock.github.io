@@ -3,141 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radon Transform with Drawing Canvas</title>
+    <title>Radon Transform</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            overflow: hidden;
-        }
-        .controls {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 1;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .controls button {
-            margin-top: 10px;
-        }
         canvas {
-            border: 1px solid #000;
-            display: block;
-            margin: 20px auto;
+            border: 1px solid black;
+            margin: 10px;
+        }
+        #imageCanvas {
+            display: inline-block;
+            margin-right: 20px;
+        }
+        #radonCanvas {
+            display: inline-block;
         }
     </style>
 </head>
 <body>
-    <div class="controls">
-        <button onclick="performRadonTransform()">Perform Radon Transform</button>
+    <h1>Radon Transform Visualization</h1>
+    <div>
+        <canvas id="imageCanvas" width="256" height="256"></canvas>
+        <canvas id="radonCanvas" width="256" height="256"></canvas>
     </div>
 
-    <canvas id="drawCanvas" width="200" height="200"></canvas>
-    <canvas id="radonCanvas"></canvas>
-
     <script>
-        const drawCanvas = document.getElementById('drawCanvas');
+        // Get references to the canvas elements
+        const imageCanvas = document.getElementById('imageCanvas');
         const radonCanvas = document.getElementById('radonCanvas');
-        const drawCtx = drawCanvas.getContext('2d');
+        const imageCtx = imageCanvas.getContext('2d');
         const radonCtx = radonCanvas.getContext('2d');
 
-        let drawing = false;
+        let squareX = 50, squareY = 50; // Initial position of the square
+        let circleX = 150, circleY = 150; // Initial position of the circle
+        let isDragging = false;
+        const squareSize = 100; // Size of the square
+        const circleRadius = 50; // Radius of the circle
 
-        // Drawing on the canvas
-        drawCanvas.addEventListener('mousedown', () => {
-            drawing = true;
-        });
-
-        drawCanvas.addEventListener('mouseup', () => {
-            drawing = false;
-            drawCtx.beginPath();
-        });
-
-        drawCanvas.addEventListener('mousemove', (event) => {
-            if (drawing) {
-                drawCtx.lineWidth = 5;
-                drawCtx.lineCap = 'round';
-                drawCtx.strokeStyle = '#000';
-                drawCtx.lineTo(event.clientX - drawCanvas.offsetLeft, event.clientY - drawCanvas.offsetTop);
-                drawCtx.stroke();
-                drawCtx.beginPath();
-                drawCtx.moveTo(event.clientX - drawCanvas.offsetLeft, event.clientY - drawCanvas.offsetTop);
-            }
-        });
-
-        function performRadonTransform() {
-            const width = drawCanvas.width;
-            const height = drawCanvas.height;
-            const imageData = drawCtx.getImageData(0, 0, width, height).data;
-            const grayData = new Float32Array(width * height);
-
-            // Convert image to grayscale
-            for (let y = 0; y < height; y++) {
-                for (let x = 0; x < width; x++) {
-                    const index = (y * width + x) * 4;
-                    const gray = (imageData[index] + imageData[index + 1] + imageData[index + 2]) / 3;
-                    grayData[y * width + x] = gray;
+        // Create a test image with square and circle
+        function createTestImage() {
+            const imageData = imageCtx.createImageData(imageCanvas.width, imageCanvas.height);
+            // Clear canvas (set everything to black)
+            for (let y = 0; y < imageCanvas.height; y++) {
+                for (let x = 0; x < imageCanvas.width; x++) {
+                    const offset = (y * imageCanvas.width + x) * 4;
+                    imageData.data[offset] = 0; // Black
+                    imageData.data[offset + 1] = 0; // Black
+                    imageData.data[offset + 2] = 0; // Black
+                    imageData.data[offset + 3] = 255; // Alpha
                 }
             }
 
-            // Radon transform parameters
-            const thetaMax = 180;
-            const maxDistance = Math.sqrt(width * width + height * height);
-            const sinogram = new Float32Array(thetaMax * Math.ceil(maxDistance * 2));
+            // Draw the square
+            for (let y = squareY; y < squareY + squareSize; y++) {
+                for (let x = squareX; x < squareX + squareSize; x++) {
+                    if (x >= 0 && x < imageCanvas.width && y >= 0 && y < imageCanvas.height) {
+                        const offset = (y * imageCanvas.width + x) * 4;
+                        imageData.data[offset] = 255; // White
+                        imageData.data[offset + 1] = 255; // White
+                        imageData.data[offset + 2] = 255; // White
+                        imageData.data[offset + 3] = 255; // Alpha
+                    }
+                }
+            }
+
+            // Draw the circle
+            for (let y = -circleRadius; y <= circleRadius; y++) {
+                for (let x = -circleRadius; x <= circleRadius; x++) {
+                    if (x * x + y * y <= circleRadius * circleRadius) {
+                        const cx = circleX + x;
+                        const cy = circleY + y;
+                        if (cx >= 0 && cx < imageCanvas.width && cy >= 0 && cy < imageCanvas.height) {
+                            const offset = (cy * imageCanvas.width + cx) * 4;
+                            imageData.data[offset] = 255; // White
+                            imageData.data[offset + 1] = 255; // White
+                            imageData.data[offset + 2] = 255; // White
+                            imageData.data[offset + 3] = 255; // Alpha
+                        }
+                    }
+                }
+            }
+
+            imageCtx.putImageData(imageData, 0, 0);
+        }
+
+        // Convert an image's pixel value to grayscale (assuming RGB image)
+        function getPixelValue(imageData, x, y) {
+            const offset = (y * imageCanvas.width + x) * 4;
+            const r = imageData.data[offset]; // Grayscale assuming R = G = B
+            return r;
+        }
+
+        // Implement the Radon Transform (using ρ and θ)
+        function radonTransform(imageData) {
+            const width = imageCanvas.width;
+            const height = imageCanvas.height;
+            const numAngles = 256; // Set numAngles and numRho to the same value
+            const numRho = numAngles;  // Set numRho equal to numAngles
+            const maxRho = Math.sqrt(width * width + height * height); // Maximum ρ
+
+            const projections = [];
+
+            // Shift center to the middle of the image
             const centerX = width / 2;
             const centerY = height / 2;
 
-            function sampleLine(theta, s) {
-                const cosTheta = Math.cos(theta);
-                const sinTheta = Math.sin(theta);
-                let sum = 0;
-                let count = 0;
+            for (let theta = 0; theta < numAngles; theta++) {
+                const projection = new Array(numRho).fill(0);
+                const thetaRad = theta * Math.PI / 180; // Convert θ to radians
 
-                for (let t = -10; t <= 10; t++) {
-                    const x = centerX + s * cosTheta - t * sinTheta;
-                    const y = centerY + s * sinTheta + t * cosTheta;
+                for (let x = 0; x < width; x++) {
+                    for (let y = 0; y < height; y++) {
+                        const value = getPixelValue(imageData, x, y); // Grayscale pixel value
 
-                    if (x >= 0 && x < width && y >= 0 && y < height) {
-                        const index = Math.floor(y) * width + Math.floor(x);
-                        sum += grayData[index];
-                        count++;
+                        // Calculate ρ (distance from the origin along the line at angle θ)
+                        // Shift coordinates so the origin is at the center of the image
+                        const xShifted = x - centerX;
+                        const yShifted = y - centerY;
+
+                        // ρ calculation (distance along the line)
+                        const rho = xShifted * Math.cos(thetaRad) + yShifted * Math.sin(thetaRad);
+
+                        // Map rho to the index in the sinogram (resolution of numRho)
+                        const rhoIndex = Math.floor((rho + maxRho) / (2 * maxRho) * numRho);
+
+                        // Add the pixel's value to the corresponding ρ,θ in the sinogram
+                        if (rhoIndex >= 0 && rhoIndex < numRho) {
+                            projection[rhoIndex] += value;
+                        }
                     }
                 }
-                return count > 0 ? sum / count : 0;
+
+                projections.push(projection);
             }
 
-            // Radon transform computation
-            for (let theta = 0; theta < thetaMax; theta++) {
-                const angle = theta * Math.PI / 180;
-                for (let r = -Math.ceil(maxDistance); r < Math.ceil(maxDistance); r++) {
-                    const s = r;
-                    const projection = sampleLine(angle, s);
-                    sinogram[theta * Math.ceil(maxDistance * 2) + (r + Math.ceil(maxDistance))] = projection;
-                }
-            }
-
-            // Render the sinogram
-            const radonWidth = thetaMax;
-            const radonHeight = Math.ceil(maxDistance * 2);
-            radonCanvas.width = radonWidth;
-            radonCanvas.height = radonHeight;
-            const radonImageData = radonCtx.createImageData(radonWidth, radonHeight);
-
-            for (let i = 0; i < radonWidth; i++) {
-                for (let j = 0; j < radonHeight; j++) {
-                    const index = (i + j * radonWidth) * 4;
-                    const value = Math.min(255, sinogram[i * radonHeight + j] / 10); // Normalize for visibility
-                    radonImageData.data[index] = value; // Red
-                    radonImageData.data[index + 1] = value; // Green
-                    radonImageData.data[index + 2] = value; // Blue
-                    radonImageData.data[index + 3] = 255;   // Alpha
-                }
-            }
-
-            radonCtx.putImageData(radonImageData, 0, 0);
+            return projections;
         }
+
+        // Visualize the sinogram (Radon transform)
+        function visualizeSinogram(projections) {
+            const width = radonCanvas.width;
+            const height = radonCanvas.height;
+
+            const maxProjection = Math.max(...projections.flat());
+            const minProjection = Math.min(...projections.flat());
+
+            // Clear the canvas before drawing
+            radonCtx.clearRect(0, 0, width, height);
+
+            // Normalize the projection values to fit the canvas
+            for (let theta = 0; theta < projections.length; theta++) {
+                const projection = projections[theta];
+
+                for (let rho = 0; rho < projection.length; rho++) {
+                    const value = (projection[rho] - minProjection) / (maxProjection - minProjection) * 255;
+                    radonCtx.fillStyle = `rgb(${value},${value},${value})`;
+
+                    // Map rho to the width of the canvas (width corresponds to ρ)
+                    const rhoMapped = Math.floor((rho / projection.length) * width);
+
+                    // Ensure we're drawing within the canvas bounds
+                    if (rhoMapped >= 0 && rhoMapped < width) {
+                        radonCtx.fillRect(rhoMapped, theta, 1, 1); // Draw a pixel at (rhoMapped, theta)
+                    }
+                }
+            }
+        }
+
+        // Mouse event handling to drag the square and circle around
+        function handleMouseDown(e) {
+            const mouseX = e.offsetX;
+            const mouseY = e.offsetY;
+
+            if (mouseX >= squareX && mouseX <= squareX + squareSize &&
+                mouseY >= squareY && mouseY <= squareY + squareSize) {
+                isDragging = 'square';
+            } else if (Math.pow(mouseX - circleX, 2) + Math.pow(mouseY - circleY, 2) <= Math.pow(circleRadius, 2)) {
+                isDragging = 'circle';
+            }
+        }
+
+        function handleMouseMove(e) {
+            if (isDragging === 'square') {
+                squareX = e.offsetX - squareSize / 2;
+                squareY = e.offsetY - squareSize / 2;
+            } else if (isDragging === 'circle') {
+                circleX = e.offsetX;
+                circleY = e.offsetY;
+            }
+            updateCanvas();
+        }
+
+        function handleMouseUp() {
+            isDragging = false;
+        }
+
+        imageCanvas.addEventListener('mousedown', handleMouseDown);
+        imageCanvas.addEventListener('mousemove', handleMouseMove);
+        imageCanvas.addEventListener('mouseup', handleMouseUp);
+        imageCanvas.addEventListener('mouseleave', handleMouseUp);
+
+        // Update the canvas and sinogram whenever any shape moves
+        function updateCanvas() {
+            createTestImage();
+            const imageData = imageCtx.getImageData(0, 0, imageCanvas.width, imageCanvas.height);
+            const projections = radonTransform(imageData);
+            visualizeSinogram(projections);
+        }
+
+        // Initialize the page
+        createTestImage();
+        const imageData = imageCtx.getImageData(0, 0, imageCanvas.width, imageCanvas.height);
+        const projections = radonTransform(imageData);
+        visualizeSinogram(projections);
     </script>
 </body>
 </html>
