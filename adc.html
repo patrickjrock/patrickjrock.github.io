@@ -51,12 +51,14 @@
 </head>
 <body>
 
-    <h1>ADC Simulator</h1>
+    <h1>DWI to ADC Simulator</h1>
+    <p>Adjust the sliders for b=0 and b=1000 DWI values, and the ADC will be computed in units of \(10^{-6}\, \text{mm}^2/\text{s}\).</p>
+
     <!-- Display the ADC formula using MathJax -->
     <div class="formula">
         <strong>ADC Formula:</strong>
         <p id="adc-formula">ADC = \( -\frac{\ln(S/S_0)}{b} \)</p>
-        Where:</p>
+        <p>Where:</p>
         <ul>
             <li><strong>S</strong> = Signal intensity at b=1000</li>
             <li><strong>S<sub>0</sub></strong> = Signal intensity at b=0</li>
@@ -95,13 +97,13 @@
         const circleB1000 = document.getElementById('circle-b1000');
         const circleADC = document.getElementById('circle-adc');
 
-        // Function to calculate ADC based on the formula: ADC = -ln(S/S0) / b, converted to 10^-3 mm^2/s
+        // Function to calculate ADC based on the formula: ADC = -ln(S/S_0) / b, converted to 10^-6 mm^2/s
         function calculateADC(S0, S, b) {
             if (S0 === 0 || S === 0 || b === 0) return 0; // To avoid division by zero or invalid log
             const ratio = S / S0;
             if (ratio >= 1) return 0; // No ADC (signal increase, no diffusion)
             const adc = -Math.log(ratio) / b;
-            return adc * 1000; // Convert to units of 10^-3 mm^2/s
+            return adc * 1000000; // Convert to units of 10^-6 mm^2/s
         }
 
         // Function to update the display
@@ -116,7 +118,7 @@
 
             // Compute ADC
             const adc = calculateADC(b0, b1000, bValue);
-            adcValueText.textContent = `ADC Value: ${adc.toFixed(2)} × 10^-3 mm²/s`;
+            adcValueText.textContent = `ADC Value: ${adc.toFixed(2)} × 10^-6 mm²/s`;
 
             // Update circle colors based on grayscale values for b=0 and b=1000
             const b0Gray = Math.floor((b0 / 10000) * 255); // Grayscale for b=0 (range 0 to 10000)
@@ -125,9 +127,16 @@
             circleB0.style.backgroundColor = `rgb(${b0Gray}, ${b0Gray}, ${b0Gray})`;
             circleB1000.style.backgroundColor = `rgb(${b1000Gray}, ${b1000Gray}, ${b1000Gray})`;
 
-            // Update the ADC circle color based on the ADC value in grayscale
-            const adcGray = Math.floor(Math.min(255, Math.abs(adc) * 255)); // Convert ADC value to grayscale
-            circleADC.style.backgroundColor = `rgb(${adcGray}, ${adcGray}, ${adcGray})`;
+            // Adjust the ADC grayscale color mapping:
+            // If ADC is 0, it should be black (0), and if ADC is 3000, it should be white (255)
+            const adcMin = 0;  // Minimum ADC value (0 corresponds to black)
+            const adcMax = 3000;  // Maximum ADC value (3000 corresponds to white)
+
+            // Scale ADC value between black (0) and white (255)
+            const scaledADC = Math.min(255, Math.max(0, ((adc - adcMin) / (adcMax - adcMin)) * 255));
+
+            // Set ADC circle background color
+            circleADC.style.backgroundColor = `rgb(${scaledADC}, ${scaledADC}, ${scaledADC})`;
         }
 
         // Event listeners for sliders
