@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.0">
+    <title>DWI to ADC Simulator</title>
+    
+    <!-- Include MathJax for rendering LaTeX-style math -->
+    <script type="text/javascript" async 
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+        }
+        .circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 20px;
+            text-align: center;
+            vertical-align: middle;
+            line-height: 150px;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .slider-container {
+            margin: 20px 0;
+        }
+        .slider {
+            width: 300px;
+        }
+        #adc-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .label {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .formula {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>ADC Simulator</h1>
+    <!-- Display the ADC formula using MathJax -->
+    <div class="formula">
+        <strong>ADC Formula:</strong>
+        <p id="adc-formula">ADC = \( -\frac{\ln(S/S_0)}{b} \)</p>
+        Where:</p>
+        <ul>
+            <li><strong>S</strong> = Signal intensity at b=1000</li>
+            <li><strong>S<sub>0</sub></strong> = Signal intensity at b=0</li>
+            <li><strong>b</strong> = b-value (for example, b=1000 in this case)</li>
+        </ul>
+    </div>
+
+    <div class="slider-container">
+        <div class="label">b=0 (Non-Diffusion Weighted Signal)</div>
+        <input id="slider-b0" class="slider" type="range" min="0" max="10000" value="10000">
+        <span id="b0-value">10000</span>
+    </div>
+
+    <div class="slider-container">
+        <div class="label">b=1000 (High Diffusion Weighted Signal)</div>
+        <input id="slider-b1000" class="slider" type="range" min="0" max="10000" value="5000">
+        <span id="b1000-value">5000</span>
+    </div>
+
+    <div>
+        <div id="circle-b0" class="circle" style="background-color: rgba(128, 128, 128, 0.8);">b=0</div>
+        <div id="circle-b1000" class="circle" style="background-color: rgba(128, 128, 128, 0.8);">b=1000</div>
+        <div id="circle-adc" class="circle" style="background-color: rgba(128, 128, 128, 0.8);">ADC</div>
+    </div>
+
+    <div id="adc-value">ADC Value: 0.00</div>
+
+    <script>
+        // Elements
+        const sliderB0 = document.getElementById('slider-b0');
+        const sliderB1000 = document.getElementById('slider-b1000');
+        const b0ValueText = document.getElementById('b0-value');
+        const b1000ValueText = document.getElementById('b1000-value');
+        const adcValueText = document.getElementById('adc-value');
+        const circleB0 = document.getElementById('circle-b0');
+        const circleB1000 = document.getElementById('circle-b1000');
+        const circleADC = document.getElementById('circle-adc');
+
+        // Function to calculate ADC based on the formula: ADC = -ln(S/S0) / b, converted to 10^-3 mm^2/s
+        function calculateADC(S0, S, b) {
+            if (S0 === 0 || S === 0 || b === 0) return 0; // To avoid division by zero or invalid log
+            const ratio = S / S0;
+            if (ratio >= 1) return 0; // No ADC (signal increase, no diffusion)
+            const adc = -Math.log(ratio) / b;
+            return adc * 1000; // Convert to units of 10^-3 mm^2/s
+        }
+
+        // Function to update the display
+        function updateDisplay() {
+            const b0 = parseFloat(sliderB0.value); // S0 value (b=0)
+            const b1000 = parseFloat(sliderB1000.value); // S value (b=1000)
+            const bValue = 1000; // b-value of 1000 for this simulation
+
+            // Update the values on the sliders
+            b0ValueText.textContent = b0;
+            b1000ValueText.textContent = b1000;
+
+            // Compute ADC
+            const adc = calculateADC(b0, b1000, bValue);
+            adcValueText.textContent = `ADC Value: ${adc.toFixed(2)} × 10^-3 mm²/s`;
+
+            // Update circle colors based on grayscale values for b=0 and b=1000
+            const b0Gray = Math.floor((b0 / 10000) * 255); // Grayscale for b=0 (range 0 to 10000)
+            const b1000Gray = Math.floor((b1000 / 10000) * 255); // Grayscale for b=1000 (range 0 to 10000)
+
+            circleB0.style.backgroundColor = `rgb(${b0Gray}, ${b0Gray}, ${b0Gray})`;
+            circleB1000.style.backgroundColor = `rgb(${b1000Gray}, ${b1000Gray}, ${b1000Gray})`;
+
+            // Update the ADC circle color based on the ADC value in grayscale
+            const adcGray = Math.floor(Math.min(255, Math.abs(adc) * 255)); // Convert ADC value to grayscale
+            circleADC.style.backgroundColor = `rgb(${adcGray}, ${adcGray}, ${adcGray})`;
+        }
+
+        // Event listeners for sliders
+        sliderB0.addEventListener('input', updateDisplay);
+        sliderB1000.addEventListener('input', updateDisplay);
+
+        // Initialize the display
+        updateDisplay();
+    </script>
+</body>
+</html>
