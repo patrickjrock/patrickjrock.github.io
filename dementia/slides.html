@@ -79,6 +79,26 @@
 </div>
 
 <div class="slide">
+    <h1>Key terms</h1>
+</div>
+
+<div class="slide">
+    <h1>Anatomic structures</h1>
+    <ul>
+        <li>Choroid fissure</li>
+	    <li>Hippocampus</li>
+        <li>Collateral sulcus</li>
+ 	    <li>Parahippocampal gyrus</li>
+        <li>Entorhinal cortex</li>
+        <hr>
+	    <li>Precuneus</li>
+	    <li>Cingulate sulcus</li>
+		<li>Marginal branch</li>
+	    <li>Parieto-occipital sulcus</li>
+    </ul>
+</div>
+
+<div class="slide">
     <h1>Definition</h1>
     <p>Dementia is a clinical syndrome charactarized by progressive decline in cognitive function severe enough to interfere with daily lifes.</p>
 </div>
@@ -144,11 +164,6 @@
         <li>Cingulate sulcus and marginal branch</li>
         <li>Parieto-occipital sulcus</li>
     </ul>
-</div>
-
-<div class="slide">
-    <h1>Quiz: Why “Mesial Temporal”? </h1>
-    <p>Because the hippocampus and parahippocampal gyrus lie along the inner (mesial) aspect of the temporal lobe.</p>
 </div>
 
 <div class="slide">
@@ -239,7 +254,6 @@
     <img src="https://www.ajnr.org/content/ajnr/early/2022/08/25/ajnr.A7586/F7.large.jpg">
 </div>
 
-
 <div class="slide">
     <h1>Case 1</h1>
     <img src="images/amyvid_positive.png">
@@ -257,6 +271,42 @@
         <summary>What kind of study is this? What is the diagnosis?</summary>
         <p>Negative Florbetapir F 18 scan: normal preserved gray-white contrast with the cortical radioactivity less than the adjacent white matter. 
            The FDA label for this agent is a great resource and was the source of these cases: <a href="https://www.accessdata.fda.gov/drugsatfda_docs/label/2012/202008s000lbl.pdf">Amyvid label</a></p>
+    </details>
+</div>
+
+<div class="slide">
+    <h1>Semantic pedantry</h1>
+    <details>
+        <summary>Why is it called the mesial temporal lobe and not the medial temporal lobe?</summary>
+        <p>Because the mesial temporal lobe faces the mesencephalon (midbrain).</p>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/54/EmbryonicBrain.svg">
+    </details>
+</div>
+
+<div class="slide">
+    <h1>Case 3</h1>
+    <img src="https://prod-images-static.radiopaedia.org/images/25104409/7139d66679002efb79420b3c73a883_big_gallery.jpeg" max-height:"70%">
+    <details>
+        <summary>What is this called?</summary>
+        <p>The precuneus. Cuneus is Latin for “wedge”. The precuneus comes before the wedge.</p>
+    </details>
+</div>
+
+<div class="slide">
+    <h1>Case 4</h1>
+    <img src="https://prod-images-static.radiopaedia.org/images/25104713/4a00fa23a8bb2a4aa8e81730c72dde_big_gallery.jpeg">
+    <details>
+        <summary>What is this called?</summary>
+        <p>The cuneus.</p>
+    </details>
+</div>
+
+<div class="slide">
+    <h1>Case 5</h1>
+    <img src="https://prod-images-static.radiopaedia.org/images/25104649/37c7b32a715ad55b4c90b7d3f4349e_big_gallery.jpeg">
+    <details>
+        <summary>What is this called?</summary>
+        <p><i>The Lingual Gyrus</i>. It might have been called the post cuneus, alas.</p>
     </details>
 </div>
 
@@ -290,10 +340,10 @@
         else if (event.key === 'ArrowLeft') previousSlide();
     });
 
-    document.addEventListener('wheel', function(event) {
-        if (event.deltaY > 0) nextSlide();
-        else previousSlide();
-    });
+//    document.addEventListener('wheel', function(event) {
+//        if (event.deltaY > 0) nextSlide();
+//        else previousSlide();
+//    });
 
     let touchStartX = 0;
     let touchEndX = 0;
