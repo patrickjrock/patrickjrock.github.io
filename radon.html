@@ -139,6 +139,42 @@
             return projections;
         }
 
+        function fastRadonTransform(image, alpha, s, zMin = -181, zMax = 181, steps = 512) {
+          const dz = (zMax - zMin) / steps;
+          let sum = 0;
+        
+          const cosA = Math.cos(alpha);
+          const sinA = Math.sin(alpha);
+          const width = image[0].length;
+          const height = image.length;
+        
+          for (let i = 0; i < steps; i++) {
+            const z = zMin + i * dz;
+        
+            // Parametric coordinates of the line
+            const x = z * sinA + s * cosA;
+            const y = -z * cosA + s * sinA;
+        
+            // Round to nearest pixel coordinates
+            const xi = Math.round(x);
+            const yi = Math.round(y);
+        
+            // Sample if inside the image bounds
+            if (xi >= 0 && xi < width && yi >= 0 && yi < height) {
+              sum += image[yi][xi];
+            }
+          }
+        
+          // Approximate integral by multiplying by dz
+          return sum * dz;
+        }
+        
+        
+
+        function lineIntegrate(f,l) {
+            
+        }
+
         // Visualize the sinogram (Radon transform)
         function visualizeSinogram(projections) {
             const width = radonCanvas.width;
