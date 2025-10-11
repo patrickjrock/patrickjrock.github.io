@@ -21,14 +21,14 @@
 
 <input type="file" id="fileInput" accept="image/*"><br><br>
 
-<canvas id="imageCanvas" width="256" height="256"></canvas>
-<canvas id="sinogramCanvas" width="256" height="256"></canvas>
-<canvas id="reconCanvas" width="256" height="256"></canvas>
+<canvas id="imageCanvas" width="400" height="400"></canvas>
+<canvas id="sinogramCanvas" width="400" height="400"></canvas>
+<canvas id="reconCanvas" width="400" height="400"></canvas>
 <br><br>
 <button id="downloadBtn">Download Sinogram</button>
 
 <script>
-const N = 256;
+const N = 400;
 const imageCanvas = document.getElementById("imageCanvas");
 const imageCtx = imageCanvas.getContext("2d");
 const sinogramCanvas = document.getElementById("sinogramCanvas");
@@ -54,7 +54,7 @@ function drawImage(imgData){
 }
 
 // Radon transform along a single line for RGB
-function radonLineRGB(image, alpha, s, zMin=-181, zMax=181, steps=256){
+function radonLineRGB(image, alpha, s, zMin=-181, zMax=181, steps=400){
   const dz = (zMax - zMin)/steps;
   let sumR=0, sumG=0, sumB=0;
   const cosA=Math.cos(alpha);
@@ -78,7 +78,7 @@ function radonLineRGB(image, alpha, s, zMin=-181, zMax=181, steps=256){
 
 // Compute full color sinogram
 function computeColorSinogram(image){
-  const angles = 256;
+  const angles = 400;
   const sSteps = N;
   const sMin = -N/2;
   const sMax = N/2;
@@ -88,7 +88,7 @@ function computeColorSinogram(image){
   let maxR=-Infinity, maxG=-Infinity, maxB=-Infinity;
 
   for (let a=0; a<angles; a++){
-    const alpha = a*Math.PI/256;
+    const alpha = a*Math.PI/400;
     const row=[];
     for (let i=0;i<sSteps;i++){
       const s = sMin + i*(sMax - sMin)/(sSteps-1);
@@ -185,7 +185,7 @@ function simpleBackprojectRGB(sinogram){
 
   const zMin = -width/2;
   const zMax = width/2;
-  const steps = 256;
+  const steps = 400;
 
   for (let a=0; a<angles; a++){
     const alpha = a*Math.PI/angles;
@@ -235,6 +235,80 @@ function simpleBackprojectRGB(sinogram){
   reconCtx.putImageData(imgData,0,0);
 }
 
+function lowPassFilterSinogram(sinogram, kernelSize=5){
+  const angles = sinogram.length;
+  const sSteps = sinogram[0].length;
+  const half = Math.floor(kernelSize/2);
+
+  // Copy sinogram to avoid modifying original
+  const filtered = sinogram.map(row => row.map(rgb => [...rgb]));
+
+  for (let a=0; a<angles; a++){
+    for (let i=0; i<sSteps; i++){
+      let sumR=0, sumG=0, sumB=0, count=0;
+      for (let k=-half; k<=half; k++){
+        const idx = i+k;
+        if (idx>=0 && idx<sSteps){
+          sumR += sinogram[a][idx][0];
+          sumG += sinogram[a][idx][1];
+          sumB += sinogram[a][idx][2];
+          count++;
+        }
+      }
+      filtered[a][i][0] = sumR / count;
+      filtered[a][i][1] = sumG / count;
+      filtered[a][i][2] = sumB / count;
+    }
+  }
+  return filtered;
+}
+
+function highPassFilterSinogram(sinogram){
+  const angles = sinogram.length;
+  const sSteps = sinogram[0].length;
+  const filtered = sinogram.map(row => row.map(rgb => [...rgb]));
+
+  for (let a=0; a<angles; a++){
+    for (let i=1; i<sSteps-1; i++){
+      filtered[a][i][0] = sinogram[a][i][0] - 0.5*(sinogram[a][i-1][0] + sinogram[a][i+1][0]);
+      filtered[a][i][1] = sinogram[a][i][1] - 0.5*(sinogram[a][i-1][1] + sinogram[a][i+1][1]);
+      filtered[a][i][2] = sinogram[a][i][2] - 0.5*(sinogram[a][i-1][2] + sinogram[a][i+1][2]);
+    }
+  }
+
+  return filtered;
+}
+
+function filteredSinogram(sinogram, lowPassSigma=0){
+  const angles = sinogram.length;
+  const sSteps = sinogram[0].length;
+  const filtered = sinogram.map(row => row.map(rgb => [...rgb]));
+
+  // FFT-based approximation: simple discrete convolution with ramp kernel
+  // Kernel: [-2, -1, 0, 1, 2] / step
+  const kernel = [-2,-1,0,1,2];
+  const kSum = kernel.reduce((a,b)=>Math.abs(a)+Math.abs(b),0); // normalization
+
+  for (let a=0; a<angles; a++){
+    for (let i=2; i<sSteps-2; i++){
+      for (let c=0; c<3; c++){ // R,G,B
+        let val = 0;
+        for (let k=-2; k<=2; k++){
+          val += kernel[k+2] * sinogram[a][i+k][c];
+        }
+        filtered[a][i][c] = val / 2; // scale factor for ramp
+      }
+    }
+  }
+
+  // Optional low-pass smoothing
+  if (lowPassSigma > 0){
+    return lowPassFilterSinogram(filtered, Math.round(lowPassSigma));
+  }
+  return filtered;
+}
+
+
 async function backprojectRGBAnimated(sinogram){
   const width = N;
   const height = N;
@@ -253,7 +327,7 @@ async function backprojectRGBAnimated(sinogram){
 
   const zMin = -width/2;
   const zMax = width/2;
-  const steps = 256;
+  const steps = 400;
 
   // Incrementally update canvas per angle
   for (let a=0; a<angles; a++){
@@ -312,7 +386,7 @@ async function backprojectRGBAnimated(sinogram){
 
 // Update computeColorSinogram to call backprojection
 function computeColorSinogram(image){
-  const angles = 256;
+  const angles = 400;
   const sSteps = N;
   const sMin = -N/2;
   const sMax = N/2;
@@ -348,7 +422,7 @@ function computeColorSinogram(image){
   }
   sinogramCtx.putImageData(imgData,0,0);
 
-  // Simple backprojection
+  // Apply filtered backprojection
   backprojectRGBAnimated(sinogram);
 }
 
