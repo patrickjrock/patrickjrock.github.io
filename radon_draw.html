@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Radon Transform</title>
+<style>
+  body {
+    font-family: sans-serif;
+    text-align: center;
+    background: #f9f9f9;
+  }
+  canvas {
+    border: 1px solid #444;
+    margin: 10px;
+    background: black;
+    cursor: crosshair;
+  }
+  #controls {
+    margin-top: 10px;
+  }
+  input[type="color"] {
+    width: 40px;
+    height: 30px;
+    border: none;
+    cursor: pointer;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+<h2>Radon Transform</h2>
+
+<canvas id="imageCanvas" width="256" height="256"></canvas>
+<canvas id="sinogramCanvas" width="256" height="256"></canvas>
+
+<div id="controls">
+  <label for="colorPicker">Pen color:</label>
+  <input type="color" id="colorPicker" value="#0077ff">
+  <button id="clearBtn">Clear</button>
+  <button id="downloadBtn">Download Sinogram</button>
+</div>
+
+<script>
+const N = 256;
+const imageCanvas = document.getElementById("imageCanvas");
+const imageCtx = imageCanvas.getContext("2d");
+const sinogramCanvas = document.getElementById("sinogramCanvas");
+const sinogramCtx = sinogramCanvas.getContext("2d");
+const colorPicker = document.getElementById("colorPicker");
+
+// --- Drawing setup ---
+let drawing = false;
+let lastX = 0, lastY = 0;
+
+imageCtx.lineWidth = 4;
+imageCtx.lineCap = "round";
+imageCtx.strokeStyle = colorPicker.value;
+
+// Update color dynamically
+colorPicker.addEventListener("input", () => {
+  imageCtx.strokeStyle = colorPicker.value;
+});
+
+function getCoords(e) {
+  const rect = imageCanvas.getBoundingClientRect();
+  return [e.clientX - rect.left, e.clientY - rect.top];
+}
+
+function startDraw(e) {
+  drawing = true;
+  [lastX, lastY] = getCoords(e);
+}
+
+function draw(e) {
+  if (!drawing) return;
+  const [x, y] = getCoords(e);
+  imageCtx.beginPath();
+  imageCtx.moveTo(lastX, lastY);
+  imageCtx.lineTo(x, y);
+  imageCtx.stroke();
+  [lastX, lastY] = [x, y];
+}
+
+function stopDraw() {
+  drawing = false;
+}
+
+imageCanvas.addEventListener("mousedown", startDraw);
+imageCanvas.addEventListener("mousemove", draw);
+imageCanvas.addEventListener("mouseup", stopDraw);
+imageCanvas.addEventListener("mouseleave", stopDraw);
+
+// Touch support
+imageCanvas.addEventListener("touchstart", e => {
+  const touch = e.touches[0];
+  startDraw(touch);
+  e.preventDefault();
+});
+imageCanvas.addEventListener("touchmove", e => {
+  const touch = e.touches[0];
+  draw(touch);
+  e.preventDefault();
+});
+imageCanvas.addEventListener("touchend", stopDraw);
+
+// --- Utility: convert ImageData to RGB array ---
+function imageToRGBArray(imgData) {
+  const arr = [];
+  for (let y = 0; y < N; y++) {
+    const row = [];
+    for (let x = 0; x < N; x++) {
+      const i = 4 * (y * N + x);
+      row.push([imgData.data[i], imgData.data[i + 1], imgData.data[i + 2]]);
+    }
+    arr.push(row);
+  }
+  return arr;
+}
+
+// --- Radon transform core ---
+function radonLineRGB(image, alpha, s, zMin = -N/2, zMax = N/2, steps = 256) {
+  const dz = (zMax - zMin) / steps;
+  let sumR = 0, sumG = 0, sumB = 0;
+  const cosA = Math.cos(alpha);
+  const sinA = Math.sin(alpha);
+  const width = image[0].length;
+  const height = image.length;
+  for (let i = 0; i < steps; i++) {
+    const z = zMin + i * dz;
+    const x = z * sinA + s * cosA + width / 2;
+    const y = -z * cosA + s * sinA + height / 2;
+    const xi = Math.round(x);
+    const yi = Math.round(y);
+    if (xi >= 0 && xi < width && yi >= 0 && yi < height) {
+      sumR += image[yi][xi][0];
+      sumG += image[yi][xi][1];
+      sumB += image[yi][xi][2];
+    }
+  }
+  return [sumR * dz, sumG * dz, sumB * dz];
+}
+
+function computeColorSinogram(image) {
+  const angles = 256; // reduce angles for speed
+  const sSteps = N;
+  const sMin = -N / 2;
+  const sMax = N / 2;
+  const sinogram = [];
+
+  let maxR = -Infinity, maxG = -Infinity, maxB = -Infinity;
+
+  for (let a = 0; a < angles; a++) {
+    const alpha = a * Math.PI / angles;
+    const row = [];
+    for (let i = 0; i < sSteps; i++) {
+      const s = sMin + i * (sMax - sMin) / (sSteps - 1);
+      const [r, g, b] = radonLineRGB(image, alpha, s);
+      if (r > maxR) maxR = r;
+      if (g > maxG) maxG = g;
+      if (b > maxB) maxB = b;
+      row.push([r, g, b]);
+    }
+    sinogram.push(row);
+  }
+
+  const imgData = sinogramCtx.createImageData(sSteps, angles);
+  for (let a = 0; a < angles; a++) {
+    for (let i = 0; i < sSteps; i++) {
+      const idx = 4 * (a * sSteps + i);
+      const [r, g, b] = sinogram[a][i];
+      imgData.data[idx + 0] = Math.min(255, Math.round((r / maxR) * 255));
+      imgData.data[idx + 1] = Math.min(255, Math.round((g / maxG) * 255));
+      imgData.data[idx + 2] = Math.min(255, Math.round((b / maxB) * 255));
+      imgData.data[idx + 3] = 255;
+    }
+  }
+  sinogramCtx.putImageData(imgData, 0, 0);
+}
+
+// --- Live update loop ---
+let frameCount = 0;
+function animate() {
+  if (frameCount % 5 === 0) { // throttle updates
+    const imgData = imageCtx.getImageData(0, 0, N, N);
+    const rgbImage = imageToRGBArray(imgData);
+    computeColorSinogram(rgbImage);
+  }
+  frameCount++;
+  requestAnimationFrame(animate);
+}
+animate();
+
+// --- Buttons ---
+document.getElementById("clearBtn").addEventListener("click", () => {
+  imageCtx.clearRect(0, 0, N, N);
+  sinogramCtx.clearRect(0, 0, N, N);
+});
+
+document.getElementById("downloadBtn").addEventListener("click", () => {
+  const dataURL = sinogramCanvas.toDataURL("image/png");
+  const link = document.createElement("a");
+  link.href = dataURL;
+  link.download = "sinogram.png";
+  link.click();
+});
+</script>
+</body>
+</html>
+
