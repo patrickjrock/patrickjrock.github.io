@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Color Radon Transform</title>
+<style>
+  body {
+    font-family: sans-serif;
+    text-align: center;
+    background: #f9f9f9;
+  }
+  canvas {
+    border: 1px solid #444;
+    margin-top: 10px;
+    background: white;
+  }
+</style>
+</head>
+<body>
+<h2>Radon Transform</h2>
+
+<input type="file" id="fileInput" accept="image/*"><br><br>
+
+<canvas id="imageCanvas" width="256" height="256"></canvas>
+<canvas id="sinogramCanvas" width="256" height="256"></canvas>
+<canvas id="reconCanvas" width="256" height="256"></canvas>
+<br><br>
+<button id="downloadBtn">Download Sinogram</button>
+
+<script>
+const N = 256;
+const imageCanvas = document.getElementById("imageCanvas");
+const imageCtx = imageCanvas.getContext("2d");
+const sinogramCanvas = document.getElementById("sinogramCanvas");
+const sinogramCtx = sinogramCanvas.getContext("2d");
+
+// Convert ImageData to 3D array [y][x][channel]
+function imageToRGBArray(imgData) {
+  const arr = [];
+  for (let y=0; y<N; y++){
+    const row = [];
+    for (let x=0; x<N; x++){
+      const i = 4*(y*N + x);
+      row.push([imgData.data[i], imgData.data[i+1], imgData.data[i+2]]);
+    }
+    arr.push(row);
+  }
+  return arr;
+}
+
+// Draw ImageData to canvas
+function drawImage(imgData){
+  imageCtx.putImageData(imgData,0,0);
+}
+
+// Radon transform along a single line for RGB
+function radonLineRGB(image, alpha, s, zMin=-181, zMax=181, steps=256){
+  const dz = (zMax - zMin)/steps;
+  let sumR=0, sumG=0, sumB=0;
+  const cosA=Math.cos(alpha);
+  const sinA=Math.sin(alpha);
+  const width=image[0].length;
+  const height=image.length;
+  for (let i=0;i<steps;i++){
+    const z = zMin + i*dz;
+    const x = z*sinA + s*cosA + width/2;
+    const y = -z*cosA + s*sinA + height/2;
+    const xi = Math.round(x);
+    const yi = Math.round(y);
+    if (xi>=0 && xi<width && yi>=0 && yi<height){
+      sumR += image[yi][xi][0];
+      sumG += image[yi][xi][1];
+      sumB += image[yi][xi][2];
+    }
+  }
+  return [sumR*dz, sumG*dz, sumB*dz];
+}
+
+// Compute full color sinogram
+function computeColorSinogram(image){
+  const angles = 256;
+  const sSteps = N;
+  const sMin = -N/2;
+  const sMax = N/2;
+  const sinogram = [];
+
+  // Find max for normalization per channel
+  let maxR=-Infinity, maxG=-Infinity, maxB=-Infinity;
+
+  for (let a=0; a<angles; a++){
+    const alpha = a*Math.PI/256;
+    const row=[];
+    for (let i=0;i<sSteps;i++){
+      const s = sMin + i*(sMax - sMin)/(sSteps-1);
+      const [r,g,b] = radonLineRGB(image, alpha, s);
+      if (r>maxR) maxR=r;
+      if (g>maxG) maxG=g;
+      if (b>maxB) maxB=b;
+      row.push([r,g,b]);
+    }
+    sinogram.push(row);
+  }
+
+  // Draw sinogram
+  const imgData = sinogramCtx.createImageData(sSteps, angles);
+  for (let a=0;a<angles;a++){
+    for (let i=0;i<sSteps;i++){
+      const idx = 4*(a*sSteps + i);
+      const [r,g,b] = sinogram[a][i];
+      imgData.data[idx+0] = Math.round(r/maxR*255);
+      imgData.data[idx+1] = Math.round(g/maxG*255);
+      imgData.data[idx+2] = Math.round(b/maxB*255);
+      imgData.data[idx+3] = 255;
+    }
+  }
+  sinogramCtx.putImageData(imgData,0,0);
+}
+
+// Load image from src
+function loadImageFromSrc(src){
+  const img = new Image();
+  img.onload = ()=>{
+    imageCtx.clearRect(0,0,N,N);
+    imageCtx.drawImage(img,0,0,N,N);
+    const imgData = imageCtx.getImageData(0,0,N,N);
+    const rgbImage = imageToRGBArray(imgData);
+    computeColorSinogram(rgbImage);
+  };
+  img.src = src;
+}
+
+// File upload
+document.getElementById("fileInput").addEventListener("change", (event)=>{
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => loadImageFromSrc(e.target.result);
+  reader.readAsDataURL(file);
+});
+
+// Paste image
+document.addEventListener("paste", (event)=>{
+  const items = event.clipboardData.items;
+  for (const item of items){
+    if(item.type.startsWith("image/")){
+      const blob = item.getAsFile();
+      const url = URL.createObjectURL(blob);
+      loadImageFromSrc(url);
+    }
+  }
+});
+
+document.getElementById("downloadBtn").addEventListener("click", () => {
+  // Convert canvas to PNG data URL
+  const dataURL = sinogramCanvas.toDataURL("image/png");
+
+  // Create a temporary link element
+  const link = document.createElement("a");
+  link.href = dataURL;
+  link.download = "sinogram.png"; // filename
+
+  // Trigger click to start download
+  link.click();
+});
+
+const reconCanvas = document.getElementById("reconCanvas");
+const reconCtx = reconCanvas.getContext("2d");
+
+// Simple backprojection
+function simpleBackprojectRGB(sinogram){
+  const width = N;
+  const height = N;
+  const angles = sinogram.length;
+  const sSteps = sinogram[0].length;
+
+  // Initialize empty image
+  const img = [];
+  for (let y=0; y<height; y++){
+    const row = [];
+    for (let x=0; x<width; x++){
+      row.push([0,0,0]);
+    }
+    img.push(row);
+  }
+
+  const zMin = -width/2;
+  const zMax = width/2;
+  const steps = 256;
+
+  for (let a=0; a<angles; a++){
+    const alpha = a*Math.PI/angles;
+    const cosA = Math.cos(alpha);
+    const sinA = Math.sin(alpha);
+
+    for (let i=0; i<sSteps; i++){
+      const s = -width/2 + i*(width/(sSteps-1));
+      const [rVal, gVal, bVal] = sinogram[a][i];
+
+      for (let j=0; j<steps; j++){
+        const z = zMin + j*(zMax - zMin)/steps;
+        const x = z*sinA + s*cosA + width/2;
+        const y = -z*cosA + s*sinA + height/2;
+        const xi = Math.round(x);
+        const yi = Math.round(y);
+        if (xi>=0 && xi<width && yi>=0 && yi<height){
+          img[yi][xi][0] += rVal/steps;
+          img[yi][xi][1] += gVal/steps;
+          img[yi][xi][2] += bVal/steps;
+        }
+      }
+    }
+  }
+
+  // Normalize
+  let maxR=-Infinity, maxG=-Infinity, maxB=-Infinity;
+  for (let y=0; y<height; y++){
+    for (let x=0; x<width; x++){
+      const [r,g,b] = img[y][x];
+      if(r>maxR) maxR=r;
+      if(g>maxG) maxG=g;
+      if(b>maxB) maxB=b;
+    }
+  }
+
+  const imgData = reconCtx.createImageData(width, height);
+  for (let y=0; y<height; y++){
+    for (let x=0; x<width; x++){
+      const idx = 4*(y*width + x);
+      imgData.data[idx+0] = Math.round(img[y][x][0]/maxR*255);
+      imgData.data[idx+1] = Math.round(img[y][x][1]/maxG*255);
+      imgData.data[idx+2] = Math.round(img[y][x][2]/maxB*255);
+      imgData.data[idx+3] = 255;
+    }
+  }
+  reconCtx.putImageData(imgData,0,0);
+}
+
+async function backprojectRGBAnimated(sinogram){
+  const width = N;
+  const height = N;
+  const angles = sinogram.length;
+  const sSteps = sinogram[0].length;
+
+  // Initialize empty image
+  const img = [];
+  for (let y=0; y<height; y++){
+    const row = [];
+    for (let x=0; x<width; x++){
+      row.push([0,0,0]);
+    }
+    img.push(row);
+  }
+
+  const zMin = -width/2;
+  const zMax = width/2;
+  const steps = 256;
+
+  // Incrementally update canvas per angle
+  for (let a=0; a<angles; a++){
+    const alpha = a*Math.PI/angles;
+    const cosA = Math.cos(alpha);
+    const sinA = Math.sin(alpha);
+
+    for (let i=0; i<sSteps; i++){
+      const s = -width/2 + i*(width/(sSteps-1));
+      const [rVal, gVal, bVal] = sinogram[a][i];
+
+      for (let j=0; j<steps; j++){
+        const z = zMin + j*(zMax - zMin)/steps;
+        const x = z*sinA + s*cosA + width/2;
+        const y = -z*cosA + s*sinA + height/2;
+        const xi = Math.round(x);
+        const yi = Math.round(y);
+        if (xi>=0 && xi<width && yi>=0 && yi<height){
+          img[yi][xi][0] += rVal/steps;
+          img[yi][xi][1] += gVal/steps;
+          img[yi][xi][2] += bVal/steps;
+        }
+      }
+    }
+
+    // Update canvas every few angles to reduce flicker
+    if (a % 4 === 0 || a === angles-1){
+      let maxR=-Infinity, maxG=-Infinity, maxB=-Infinity;
+      for (let y=0;y<height;y++){
+        for (let x=0;x<width;x++){
+          const [r,g,b] = img[y][x];
+          if(r>maxR) maxR=r;
+          if(g>maxG) maxG=g;
+          if(b>maxB) maxB=b;
+        }
+      }
+
+      const imgData = reconCtx.createImageData(width, height);
+      for (let y=0;y<height;y++){
+        for (let x=0;x<width;x++){
+          const idx = 4*(y*width + x);
+          imgData.data[idx+0] = Math.round(img[y][x][0]/maxR*255);
+          imgData.data[idx+1] = Math.round(img[y][x][1]/maxG*255);
+          imgData.data[idx+2] = Math.round(img[y][x][2]/maxB*255);
+          imgData.data[idx+3] = 255;
+        }
+      }
+      reconCtx.putImageData(imgData,0,0);
+
+      // Small pause to allow rendering
+      await new Promise(r => setTimeout(r, 10));
+    }
+  }
+}
+
+
+// Update computeColorSinogram to call backprojection
+function computeColorSinogram(image){
+  const angles = 256;
+  const sSteps = N;
+  const sMin = -N/2;
+  const sMax = N/2;
+  const sinogram = [];
+
+  let maxR=-Infinity, maxG=-Infinity, maxB=-Infinity;
+
+  for (let a=0; a<angles; a++){
+    const alpha = a*Math.PI/angles;
+    const row=[];
+    for (let i=0;i<sSteps;i++){
+      const s = sMin + i*(sMax - sMin)/(sSteps-1);
+      const [r,g,b] = radonLineRGB(image, alpha, s);
+      if (r>maxR) maxR=r;
+      if (g>maxG) maxG=g;
+      if (b>maxB) maxB=b;
+      row.push([r,g,b]);
+    }
+    sinogram.push(row);
+  }
+
+  // Draw sinogram
+  const imgData = sinogramCtx.createImageData(sSteps, angles);
+  for (let a=0;a<angles;a++){
+    for (let i=0;i<sSteps;i++){
+      const idx = 4*(a*sSteps + i);
+      const [r,g,b] = sinogram[a][i];
+      imgData.data[idx+0] = Math.round(r/maxR*255);
+      imgData.data[idx+1] = Math.round(g/maxG*255);
+      imgData.data[idx+2] = Math.round(b/maxB*255);
+      imgData.data[idx+3] = 255;
+    }
+  }
+  sinogramCtx.putImageData(imgData,0,0);
+
+  // Simple backprojection
+  backprojectRGBAnimated(sinogram);
+}
+
+
+</script>
+</body>
+</html>
+
