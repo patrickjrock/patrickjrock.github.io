@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Radon Maze Game - Fixed L Shape</title>
+<style>
+  body { text-align:center; font-family:sans-serif; background:#222; color:white; }
+  canvas { border:1px solid #444; margin:10px; background:black; }
+</style>
+</head>
+<body>
+<h2>Radon Maze Game - L Shape</h2>
+<p>Use arrow keys to move the blue ball. You only see the colored Radon transform!</p>
+<canvas id="mazeCanvas" width="256" height="256"></canvas>
+<canvas id="sinogramCanvas" width="256" height="256"></canvas>
+
+<script>
+const N = 256;
+const mazeCanvas = document.getElementById("mazeCanvas");
+const mazeCtx = mazeCanvas.getContext("2d");
+const sinogramCanvas = document.getElementById("sinogramCanvas");
+const sinogramCtx = sinogramCanvas.getContext("2d");
+
+const cellSize = 16;
+const rows = N / cellSize;
+const cols = N / cellSize;
+
+// --- L-shaped maze ---
+const maze = [];
+for (let y = 0; y < rows; y++) {
+  const row = [];
+  for (let x = 0; x < cols; x++) {
+    // Vertical leg at column 3 (except bottom rows)
+    // Horizontal leg at row rows-4 (except left columns)
+    if ((x === 3 && y < rows - 4) || (y === rows - 4 && x > 3)) {
+      row.push(1); // wall
+    } else {
+      row.push(0); // empty
+    }
+  }
+  maze.push(row);
+}
+
+// Player
+let player = {x:0, y:0, r: cellSize/2-1};
+
+// Exit (just for reference, could add win logic later)
+maze[rows-1][cols-1] = 0;
+
+// --- Draw maze and player ---
+function drawMaze(){
+  mazeCtx.clearRect(0,0,N,N);
+  for(let y=0;y<rows;y++){
+    for(let x=0;x<cols;x++){
+      if(maze[y][x]){
+        mazeCtx.fillStyle="white";
+        mazeCtx.fillRect(x*cellSize,y*cellSize,cellSize,cellSize);
+      }
+    }
+  }
+  // Draw player
+  mazeCtx.fillStyle="blue";
+  mazeCtx.beginPath();
+  mazeCtx.arc(player.x*cellSize + cellSize/2, player.y*cellSize + cellSize/2, player.r,0,2*Math.PI);
+  mazeCtx.fill();
+}
+
+// --- Convert canvas to RGB array ---
+function imageToRGBArray(imgData){
+  const arr = [];
+  for(let y=0;y<N;y++){
+    const row=[];
+    for(let x=0;x<N;x++){
+      const i=4*(y*N+x);
+      row.push([imgData.data[i], imgData.data[i+1], imgData.data[i+2]]);
+    }
+    arr.push(row);
+  }
+  return arr;
+}
+
+// --- Radon transform (RGB) ---
+function radonLineRGB(image, alpha, s, steps=256){
+  const dz = N / steps;
+  let sumR=0, sumG=0, sumB=0;
+  const cosA=Math.cos(alpha);
+  const sinA=Math.sin(alpha);
+  for(let i=0;i<steps;i++){
+    const z = -N/2 + i*dz;
+    const x = z*sinA + s*cosA + N/2;
+    const y = -z*cosA + s*sinA + N/2;
+    const xi=Math.floor(x);
+    const yi=Math.floor(y);
+    if(xi>=0 && xi<N && yi>=0 && yi<N){
+      sumR+=image[yi][xi][0];
+      sumG+=image[yi][xi][1];
+      sumB+=image[yi][xi][2];
+    }
+  }
+  return [sumR*dz/steps, sumG*dz/steps, sumB*dz/steps];
+}
+
+function computeColorSinogram(image){
+  const angles=256;
+  const sSteps=N;
+  const sMin=-N/2, sMax=N/2;
+  const sinogram=[];
+  let maxR=0, maxG=0, maxB=0;
+
+  for(let a=0;a<angles;a++){
+    const alpha=a*Math.PI/angles;
+    const row=[];
+    for(let i=0;i<sSteps;i++){
+      const s=sMin + i*(sMax-sMin)/(sSteps-1);
+      const [r,g,b] = radonLineRGB(image, alpha, s);
+      if(r>maxR) maxR=r;
+      if(g>maxG) maxG=g;
+      if(b>maxB) maxB=b;
+      row.push([r,g,b]);
+    }
+    sinogram.push(row);
+  }
+
+  // Draw sinogram
+  const imgData=sinogramCtx.createImageData(N,N);
+  for(let a=0;a<angles;a++){
+    for(let i=0;i<sSteps;i++){
+      const idx=4*(a*N+i);
+      const [r,g,b]=sinogram[a][i];
+      imgData.data[idx+0]=Math.min(255, Math.round(r/maxR*255));
+      imgData.data[idx+1]=Math.min(255, Math.round(g/maxG*255));
+      imgData.data[idx+2]=Math.min(255, Math.round(b/maxB*255));
+      imgData.data[idx+3]=255;
+    }
+  }
+  sinogramCtx.putImageData(imgData,0,0);
+}
+
+// --- Game loop ---
+function update(){
+  drawMaze();
+  const imgData=mazeCtx.getImageData(0,0,N,N);
+  const rgb=imageToRGBArray(imgData);
+  computeColorSinogram(rgb);
+  requestAnimationFrame(update);
+}
+update();
+
+// --- Controls ---
+window.addEventListener("keydown",(e)=>{
+  let nx=player.x, ny=player.y;
+  if(e.key==="ArrowUp") ny--;
+  else if(e.key==="ArrowDown") ny++;
+  else if(e.key==="ArrowLeft") nx--;
+  else if(e.key==="ArrowRight") nx++;
+  if(nx>=0 && nx<cols && ny>=0 && ny<rows && maze[ny][nx]===0){
+    player.x=nx;
+    player.y=ny;
+  }
+});
+</script>
+</body>
+</html>
+
